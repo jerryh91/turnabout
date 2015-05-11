@@ -1,0 +1,15 @@
+<div class="page-header">
+  <h1> {{ groupName }} <small> {{ searchCriteria }} </small></h1>
+</div>
+
+<div id="theList" class="list-group">
+  <li class="thumbnail col-sm-12">
+    <img class="col-sm-4" src="{{ userProfile.image_src }}">
+    <div class="caption col-sm-8">
+      <h2>{{ username }}</h2>
+      <h2>{{ userProfile.points }}Ƥ</h2>
+      <p>{{userProfile.detail}}</p>
+      <p><a href="#" class="btn btn-primary" role="button">Like</a></p>
+    </div>
+  </li>
+</div>
