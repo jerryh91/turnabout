@@ -18,8 +18,12 @@ mainApp.config(['$routeProvider', function($routeProvider) {
         templateUrl: 'profile.html',
         controller: 'ProfileController'
       }).
+      when('/home',{
+        templateUrl: 'home.html',
+        controller: 'HomeController'
+      }).
       otherwise({
-        redirectTo: '/browse'
+        redirectTo: '/home'
       });
   }]);
 
@@ -50,6 +54,10 @@ mainApp.controller('Test1Controller', function($scope, $routeParams) {
 mainApp.controller('Test2Controller', function($scope, $routeParams) {
     $scope.params = $routeParams;
     $scope.message = 'This message came from the Test2Controller and had parameters.';
+});
+
+mainApp.controller('HomeController', function($scope, $routeParams) {
+    $scope.message = 'We\'re glad to have you. To get started, select Browse from the dropdown menu in the navigation bar.';
 });
 
 function getProfiles(){
