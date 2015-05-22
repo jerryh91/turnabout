@@ -4,7 +4,7 @@ mainApp.config(['$routeProvider', function($routeProvider) {
     $routeProvider.
       when('/test1', {
         templateUrl: 'test1.html',
-        controller: 'Test1Controller'
+        controllser: 'Test1Controller'
       }).
       when('/test2/:inputParam', {
         templateUrl: 'test2.html',
