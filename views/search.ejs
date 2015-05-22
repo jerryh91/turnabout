@@ -1,0 +1,29 @@
+<form role="search" class="simple-form">
+  <input type="text" class="form-control" ng-model="search.location" placeholder="Location" /><br />
+  <input type="number" class="form-control" ng-model="search.radius" placeholder="Radius (miles)"/><br />
+  <input type="number" class="form-control" ng-model="search.agemin" placeholder="Age (min)" /><br />
+  <input type="number" class="form-control" ng-model="search.agemax" placeholder="Age (max)" /><br />
+  <div class="row">
+    <div class="col-lg-2">
+      <div class="input-group"> 
+        <span class="input-group-addon">
+          <input type="radio" ng-model="search.gender" value="male"></input>
+        </span>
+        <span class="input-group-addon" id="basic-addon2">Male</span>
+      </div>
+    </div>
+    <div class="col-lg-2">
+      <div class="input-group"> 
+        <span class="input-group-addon">
+          <input type="radio" ng-model="search.gender" value="female"></input>
+        </span>
+        <span class="input-group-addon" id="basic-addon2">Female</span>
+      </div>
+    </div>
+  </div>
+  <br/>
+  <input class="btn btn-default" type="button" ng-click="reset()" value="Reset" />
+  <input class="btn btn-default" type="button" ng-click="search()" value="Search" />
+</form>
+
+<pre>form = {{search | json}}</pre>
