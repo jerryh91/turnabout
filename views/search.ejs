@@ -1,4 +1,4 @@
-<form role="search" class="simple-form">
+<form role="search" class="simple-form" ng-submit="doSearch()">
   <input type="text" class="form-control" ng-model="search.location" placeholder="Location" /><br />
   <input type="number" class="form-control" ng-model="search.radius" placeholder="Radius (miles)"/><br />
   <input type="number" class="form-control" ng-model="search.agemin" placeholder="Age (min)" /><br />
@@ -23,7 +23,7 @@
   </div>
   <br/>
   <input class="btn btn-default" type="button" ng-click="reset()" value="Reset" />
-  <input class="btn btn-default" type="button" ng-click="search()" value="Search" />
+  <button class="btn btn-default">Search</button>
 </form>
 
 <pre>form = {{search | json}}</pre>
