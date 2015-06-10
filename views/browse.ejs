@@ -4,7 +4,7 @@
 
 <div id="theList" class="list-group">
   <li class="thumbnail col-sm-12" ng-repeat="profile in profiles">
-    <a href="{{fileLocation.absUrl()}}/{{profile.username}}"><img class="col-sm-4" src="{{ profile.image_src }}"></a>
+    <a href="{{fileLocation.absUrl()}}/{{profile.username}}"><img class="col-sm-4" ng-src="{{ profile.image_src }}"></a>
     <div class="caption col-sm-8">
       <h2>{{ profile.username }}</h2>
       <h4>{{ profile.points }}Ƥ</h4>

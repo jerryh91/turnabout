@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>My App</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js"></script>
+  </head>
+  <body>
+    <h1>Page2: express_intro2</h1>
+
+    Following data is passed from controller to view:
+    <br />
+    <strong><%= name %></strong>
+
+    <br />
+    <br />
+    Following data is passed from controller to view:
+    <ul>
+    	<% 
+
+    	for (var i = 0; i<supplies.length; i++)
+    	{%>
+    		<strong><li><%= supplies[i] %></li></strong>
+    		
+    	<%} 
+    	%>
+
+    </ul>
+    <br />
+    <%= new Date() %>
+
+
+  </body>
+</html>
