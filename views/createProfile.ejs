@@ -1,0 +1,30 @@
+<form role="create" class="simple-form" ng-submit="createProfile()">
+  <input type="email" class="form-control" ng-model="profile.email" placeholder="Email" /><br />
+  <input type="text" class="form-control" ng-model="profile.password" placeholder="Password" /><br />
+  <input type="text" class="form-control" ng-model="profile.username" placeholder="Username" /><br />
+  <input type="text" class="form-control" ng-model="profile.location" placeholder="Location" /><br />
+  <input type="number" class="form-control" ng-model="profile.age" placeholder="Age" /><br />
+  <div class="row">
+    <div class="col-lg-2">
+      <div class="input-group"> 
+        <span class="input-group-addon">
+          <input type="radio" ng-model="profile.gender" value="male"></input>
+        </span>
+        <span class="input-group-addon" id="basic-addon2">Male</span>
+      </div>
+    </div>
+    <div class="col-lg-2">
+      <div class="input-group"> 
+        <span class="input-group-addon">
+          <input type="radio" ng-model="profile.gender" value="female"></input>
+        </span>
+        <span class="input-group-addon" id="basic-addon2">Female</span>
+      </div>
+    </div>
+  </div>
+  <br/>
+  <input class="btn btn-default" type="button" ng-click="reset()" value="Reset" />
+  <button class="btn btn-default">Create</button>
+</form>
+
+<pre>form = {{profile | json}}</pre>
