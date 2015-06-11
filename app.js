@@ -10,7 +10,7 @@ var session = require('express-session');
 
 //routers:
 var api = require('./routes/api');
-// var authenticate = require('./routes/authenticate');
+var authenticate = require('./routes/authenticate')(passport);
 
 
 var app = express();
@@ -36,7 +36,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 //map routers to uri
 app.use('/', api);
-// app.use('/auth', authenticate);
+app.use('/auth', authenticate);
 
 app.post('/search', function(req, res) {
     console.log('received post: ' + String(req.body.location));

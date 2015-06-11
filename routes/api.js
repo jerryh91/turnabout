@@ -21,7 +21,7 @@ router.route('/home')
 .get(function(req, res) {
 
 	//Query from MongoDB
-	res.render('home', {title: 'express'});
+	res.render('home', {message: 'My message'});
 
 });
 
