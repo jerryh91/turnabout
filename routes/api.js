@@ -65,6 +65,11 @@ router.route('/search')
   	}
 });
 
+router.route('/createProfile')
+.get(function(req, res) {
+	res.render('createProfile', {title: 'Sign Up!'});
+});
+
 // router.route('/search')
 // .get(function(req, res) {
 

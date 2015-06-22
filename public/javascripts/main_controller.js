@@ -22,6 +22,10 @@ mainApp.config(['$routeProvider', function($routeProvider) {
         templateUrl: 'home',
         controller: 'HomeController'
       }).
+      when('/createProfile',{
+        templateUrl: 'createProfile',
+        controller: 'CreateProfileController'
+      }).
       when('/search',{
         templateUrl: 'search',
         controller: 'SearchController'
@@ -77,6 +81,31 @@ mainApp.controller('BrowseController', function($scope, $routeParams, $location,
   $scope.groupName = "Men";
   $scope.searchCriteria = "Location: " + search.location + "|Radius: " + search.radius;
   $scope.profiles = results;
+});
+
+mainApp.controller('CreateProfileController', function($scope, $location, $http) {
+  $scope.profile = {
+    email: "marcus.a.bennett@gmail.com",
+    password: "asdf",
+    username: "goals23",
+    location: "Austin",
+    age: 24,
+    gender: "male"
+  };
+  $scope.fileLocation = $location;
+  $scope.reset = function() {
+    $scope.profile = {};
+  };
+  $scope.createProfile = function() {
+    $http.post('/signup', $scope.profile)
+    .success(function(data, status, headers, config){
+        console.log(data);
+    }})
+    .error(function(data, status, headers, config){
+        /*handle non 200 statuses*/
+        console.log('error posting');
+    });
+  };
 });
 
 mainApp.controller('SearchController', function($scope, $routeParams, $location, $http, searchService) {
