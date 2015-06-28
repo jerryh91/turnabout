@@ -100,7 +100,7 @@ mainApp.controller('CreateProfileController', function($scope, $location, $http)
     $http.post('/signup', $scope.profile)
     .success(function(data, status, headers, config){
         console.log(data);
-    }})
+    })
     .error(function(data, status, headers, config){
         /*handle non 200 statuses*/
         console.log('error posting');
