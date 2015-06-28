@@ -7,6 +7,13 @@ var bodyParser = require('body-parser');
 var passport = require('passport');
 var session = require('express-session');
 
+//Object Data Mapper: mongoose enforces Schema 
+var mongoose = require ('mongoose');
+
+
+//Connect to MongoDB
+mongoose.connect('mongodb://localhost:27017/express_intro2');
+require('./models/models.js');
 
 //routers:
 var api = require('./routes/api');
@@ -34,26 +41,31 @@ app.use(passport.session());
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+/// Initialize Passport
+var initPassport = require('./passport-init');
+initPassport(passport);
 //map routers to uri
 app.use('/', api);
 app.use('/auth', authenticate);
 
-app.post('/signup', function(req, res) {
-    console.log('received post: ' + String(req.body.location));
-    var postedProfileForm = req.body;
-    var meetsCriteria = CheckProfileForm(postedProfileForm);
-    if(meetsCriteria){
-      res.send('It worked!');
-    }
-    else {
-      res.send('Invalid form');
-    }
-});
 
-function CheckProfileForm(form) {
-  // This function should check the database to see if a user already exists and also if the form contains enough information and return true if it's valid
-  return false;
-}
+
+// app.post('/signup', function(req, res) {
+//     console.log('received post: ' + String(req.body.location));
+//     var postedProfileForm = req.body;
+//     var meetsCriteria = CheckProfileForm(postedProfileForm);
+//     if(meetsCriteria){
+//       res.send('It worked!');
+//     }
+//     else {
+//       res.send('Invalid form');
+//     }
+// });
+
+// function CheckProfileForm(form) {
+//   // This function should check the database to see if a user already exists and also if the form contains enough information and return true if it's valid
+//   return false;
+// }
 
 //Implement a webserver to Listen to web requests on a port
 //Render views,...

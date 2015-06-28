@@ -1,10 +1,9 @@
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
-var bcrypt = require('bcrypt-nodejs');
-
-//temp user data
-//TODO: Hook w/ MongoDB
-var users = {};
+var bCrypt = require('bcrypt-nodejs');
+var mongoose = require('mongoose');
+var User = mongoose.model('User');
+var Post = mongoose.model('Post');
 
 module.exports = function (passport)
 {
@@ -18,89 +17,123 @@ module.exports = function (passport)
     //TODO: Investigate deeper into purpose of de/serialize
     passport.serializeUser(function(user, done) 
     {
-        console.log('serializing user:',user.username);
-        return done(null, user.username));
+        console.log('serializing user:',user._id);
+        return done(null, user._id);
     });
 
-    //Desieralize user will call with the unique id provided by serializeuser
-    passport.deserializeUser(function(username, done) 
+    passport.deserializeUser(function(id, done) 
     {
+        //Find user with _id
+        User.findById (id, function (err, user)
+        {
+          if (err)
+          {
+            return done(err, false);
+          }
 
-        return done(null, users[username]);
-
+          if (!user)
+          {
+            return done ('user not found', false);
+          }
+          //return user obj to passport
+          return done(user, true);
+        })
+    
     });
-
 
     passport.use('login', new LocalStrategy(
-      {
-              passReqToCallback : true
-      },
+    {
+            passReqToCallback : true
+    },
     
       function(req, username, password, done) 
       { 
 
-    
-              if (!users[username])
+            User.findOne({'username' : username}, function(err, user){
+
+              if (err)
+              {
+                return done("db err: "+ err, false);
+              }
+
+              if (!user)
               {
                 //User doesn't exist in db
                 return done('user:' + username + 'NOT in db', false);
               }
-              else if (!isValidPwd(users[username], password))
+              else if (!isValidPwd(user, password))
               {
                 return done('user:  '+ username + 'incorrect password', false);
               }
-
               //Successful login
               console.log('Successfully signed in');
-              return done(null, users[username]);
-      })
-    );
+              return done(null, user);
+            });
+      }
+    ));
 
-    passport.use('signup', new LocalStrategy (
-      {
-        //Pass entire req to call back function
-          passReqToCallback : true
-      },
+    passport.use('signup', new LocalStrategy(
+    {
+        passReqToCallback : true
+    },
 
       //passport can parse 
       //username, password from a form body
-      function (req, username, password, true)
-      {
-
-          if(users[username])
+      function (req, username, password, done)
+      { 
+          console.log("in signup");
+        // console.log('signup function callback');
+          User.findOne({'username': username}, function(err, user)
           {
-              return done('User :'+ username + 'already exists', false);
-          }
+                if (err)
+                {
+                  console.log('err');
+                  return done(err, false);
+                }
+                
+                if (user)
+                {
+                  console.log('user exists');
+                  //User already in db
+                  return done('user:' + username + 'already in db', false);
+                } else
+                {
+                  console.log('creating new user');
+                  //Create new user
+                  var newUser = new User ();
+                  newUser.username = username;
+                  newUser.password = createHash(password);
 
-          //Create new user 
-          users [username] = 
-          {
-              username : username,
-              password : createHash(password)
-          }
+                  newUser.save(function(err, newUser)
+                    {
+                      if (err)
+                      {
+                        return (err, false);
+                      }
+                     
+                      console.log('Successfully signed up user: ' + username);
+                      return done(null, newUser);
+                    });
+                }
+                
+              });
 
-          console.log(users[username].username + ' Registration successful');
-          return done(null, users[username]);
+          // if(users[username])
+          // {
+          //     return done('User :'+ username + 'already exists', false);
+          // }
+
+          // //Add new username:password
+          // users [username] = 
+          // {
+          //     username : username,
+          //     password : createHash(password)
+          // };
+
+          // return done(null, users[username]);
       })
     );
 
-    // passport.use(new LocalStrategy(
-    //   function(username, password, done) {
-    //     User.findOne({ username: username }, function(err, user) {
-    //       if (err) { return done(err); }
-    //       if (!user) {
-    //         return done(null, false, { message: 'Incorrect username.' });
-    //       }
-    //       if (!user.validPassword(password)) {
-    //         return done(null, false, { message: 'Incorrect password.' });
-    //       }
-    //       return done(null, user);
-    //     });
-    //   }
-    // ));
-    
-
-    //Compare user submitted password to user password in db
     var isValidPwd = function(user, password)
     {
 
@@ -111,5 +144,6 @@ module.exports = function (passport)
     {
       return bCrypt.hashSync(password, bCrypt.genSaltSync(10), null);
     };
+   
 
 }
