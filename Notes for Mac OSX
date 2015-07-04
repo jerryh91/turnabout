@@ -1,0 +1,13 @@
+Notes for Mac OSX Yosemite (10.10.3)
+
+Running mongo db
+1. open terminal
+2. run "sudo -s" to run as root user
+3. run "mongod"
+4. you can run a client terminal with the "mongo" command
+
+Running express app
+1. open terminal
+2. navigate to project directory
+3. run "node app"
+4. Open safari and go to localhost:1337
