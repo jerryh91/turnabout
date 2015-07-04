@@ -33,7 +33,7 @@ module.exports = function (passport)
 
           if (!user)
           {
-            return done ('user not found', false);
+            return done('user not found', false);
           }
           //return user obj to passport
           return done(user, true);
@@ -43,7 +43,9 @@ module.exports = function (passport)
 
     passport.use('login', new LocalStrategy(
     {
-            passReqToCallback : true
+            passReqToCallback : true,
+            usernameField: 'username', // this is the default, but adding for clarity
+            passwordField: 'password'  // this is the default, but adding for clarity
     },
     
       function(req, username, password, done) 
@@ -74,7 +76,9 @@ module.exports = function (passport)
 
     passport.use('signup', new LocalStrategy(
     {
-        passReqToCallback : true
+        passReqToCallback : true,
+        usernameField: 'username', // this is the default, but adding for clarity
+        passwordField: 'password'  // this is the default, but adding for clarity
     },
 
       //passport can parse 
