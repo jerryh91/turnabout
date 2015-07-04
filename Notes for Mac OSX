@@ -1,10 +1,14 @@
-Notes for Mac OSX Yosemite (10.10.3)
+Development Notes 
+
+Written for Mac OSX Yosemite (10.10.3), but may be similar on Windows.
 
 Running mongo db
 1. open terminal
 2. run "sudo -s" to run as root user
 3. run "mongod"
-4. you can run a client terminal with the "mongo" command
+4. you can run a client terminal with the "mongo" command 
+	useful commands: "use whysosingle" <- switches the database
+			 		 "db.users.drop()" <- deletes the collection (or table if thinking from SQL)
 
 Running express app
 1. open terminal
