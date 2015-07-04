@@ -1,3 +1,7 @@
+//
+// app.js
+//
+
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
@@ -5,20 +9,18 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var passport = require('passport');
+var api = require('./routes/api'); //router
+var authenticate = require('./routes/authenticate')(passport); //router
 var session = require('express-session');
+var mongoose = require('mongoose'); //Object Data Mapper: mongoose enforces Schema 
+var models = require('./models/models.js'); // 'var models' not used anywhere yet
+var initPassport = require('./passport-init'); //needs models.js to be loaded first
 
-//Object Data Mapper: mongoose enforces Schema 
-var mongoose = require ('mongoose');
-
+// Initialize Passport
+initPassport(passport);
 
 //Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/express_intro2');
-require('./models/models.js');
-
-//routers:
-var api = require('./routes/api');
-var authenticate = require('./routes/authenticate')(passport);
-
+mongoose.connect('mongodb://localhost:27017/whysosingle');
 
 var app = express();
 
@@ -27,7 +29,6 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 //middleware:
-// uncomment after placing your favicon in /public
 app.use(favicon(__dirname + '/public/favicon.ico'));
 app.use(logger('dev'));
 app.use(session({secret: 'our secret', 
@@ -38,17 +39,11 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(passport.initialize());
 app.use(passport.session());
-
 app.use(express.static(path.join(__dirname, 'public')));
 
-/// Initialize Passport
-var initPassport = require('./passport-init');
-initPassport(passport);
 //map routers to uri
 app.use('/', api);
 app.use('/auth', authenticate);
-
-
 
 // app.post('/signup', function(req, res) {
 //     console.log('received post: ' + String(req.body.location));
@@ -96,7 +91,7 @@ app.use(function(req, res, next) {
 
 // development error handler
 // will print stacktrace
-if (app.get('env') === 'development') {
+if(app.get('env') === 'development') {
   app.use(function(err, req, res, next) {
     res.status(err.status || 500);
     res.render('error', {
@@ -123,7 +118,6 @@ app.use(function(err, req, res, next) {
     error: {}
   });
 });
-
 
 module.exports = app;
 
