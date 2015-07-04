@@ -27,3 +27,8 @@ var postSchema = new mongoose.Schema({
 //Model declaration: "User", "Post"
 mongoose.model("User", userSchema);
 mongoose.model("Post", postSchema);
+
+module.exports = {
+	userSchema: userSchema,
+	postSchema: postSchema
+};
