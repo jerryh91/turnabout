@@ -97,7 +97,7 @@ mainApp.controller('CreateProfileController', function($scope, $location, $http)
     $scope.profile = {};
   };
   $scope.createProfile = function() {
-    $http.post('/signup', $scope.profile)
+    $http.post('/auth/signup', $scope.profile)
     .success(function(data, status, headers, config){
         console.log(data);
     })
