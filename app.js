@@ -45,41 +45,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', api);
 app.use('/auth', authenticate);
 
-// app.post('/signup', function(req, res) {
-//     console.log('received post: ' + String(req.body.location));
-//     var postedProfileForm = req.body;
-//     var meetsCriteria = CheckProfileForm(postedProfileForm);
-//     if(meetsCriteria){
-//       res.send('It worked!');
-//     }
-//     else {
-//       res.send('Invalid form');
-//     }
-// });
-
-// function CheckProfileForm(form) {
-//   // This function should check the database to see if a user already exists and also if the form contains enough information and return true if it's valid
-//   return false;
-// }
-
-//Implement a webserver to Listen to web requests on a port
-//Render views,...
-
-//Define routes (paths, handlers) on server
-
-//Routing refers to the definition of 
-//end points (URIs) to an application and how it responds to client requests.
-// app.get('/', function(req, res)
-// {
-//   //render('views/[view filename]', [locals], [callback func])
-  
-//   //locals: object whose properties define local variables for the view
-//   //pass 'local' variables/data to view 
-
-//   res.render('index', { title: 'Express', name: 'Jerry', supplies:['broom', 'mop', 'dustpan']});
-// });
-
-
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');
@@ -88,36 +53,27 @@ app.use(function(req, res, next) {
 });
 
 // error handlers
-
-// development error handler
-// will print stacktrace
 if(app.get('env') === 'development') {
   app.use(function(err, req, res, next) {
+    console.log('development error handler');
     res.status(err.status || 500);
     res.render('error', {
       message: err.message,
-      error: err
+      error: err // will print stacktrace
+    });
+  });
+} else {
+  // production error handler
+  // no stacktraces leaked to user
+  app.use(function(err, req, res, next) {
+    console.log('production error handler');
+    res.status(err.status || 500);
+    res.render('error', {
+      message: err.message,
+      error: {}
     });
   });
 }
-
-// app.get('/search', function(req, res, next) {
-//   console.log("entered GET for /search");
-//   if (req.param('location')) {
-//     console.log("Location: " + req.query.location);
-//   };
-//   next();
-// });
-
-// production error handler
-// no stacktraces leaked to user
-app.use(function(err, req, res, next) {
-  res.status(err.status || 500);
-  res.render('error', {
-    message: err.message,
-    error: {}
-  });
-});
 
 module.exports = app;
 

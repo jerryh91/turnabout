@@ -59,6 +59,7 @@ router.route('/profile')
 router.route('/search')
 .get(function(req, res) {
 	if (req.query.location) {
+		// PUT SEARCH LOGIC HERE
     	res.json(filteredProfiles);
   	} else {
 		res.render('search', {title: 'express'});
@@ -70,16 +71,7 @@ router.route('/createProfile')
 	res.render('createProfile', {title: 'Sign Up!'});
 });
 
-// router.route('/search')
-// .get(function(req, res) {
-
-// 	//Query from MongoDB
-// 	res.render('index', {title: 'express'});
-
-// });
-
 router.route('/page2')
-
 .get(function(req, res) {
 
 	//Query data from MongoDB
@@ -89,7 +81,6 @@ router.route('/page2')
 	res.render('page2',  data);
 
 });
-
 
 //RESTFul API: CRUD
 router.route('/profiles')
@@ -107,7 +98,6 @@ router.route('/profiles')
 // /profiles/:<any alpha numeric>
 
 router.route('/profiles/:id')
-
 .get(function(req, res) {
 
 		var profileID = req.params.id;
@@ -131,15 +121,5 @@ router.route('/profiles/:id')
 		res.send({message: 'Delete profile: ' + profileID})
 
 })
-
-
-//TODO: How to grab other field data from form?
-// .post(function(req, res) {
-
-// 	var profileID = req.params.id;
-// 	//Add to MongoDB
-// 	res.send({message: 'Create profile: ' + profileID});
-// });	
-
 
 module.exports = router;
