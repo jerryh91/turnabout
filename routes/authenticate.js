@@ -4,16 +4,15 @@ var router = express.Router();
 module.exports = function(passport){
 
     //log in
-    router.post('/login', passport.authenticate('login', {
-        successRedirect: '/auth/success',
-        failureRedirect: '/auth/failure'
-    }));
+    // router.post('/login', passport.authenticate('login', {
+    //     successRedirect: '/auth/success',
+    //     failureRedirect: '/auth/failure'
+    // }));
 
     //sign up
-    router.post('/signup', passport.authenticate('signup', {
-        successRedirect: '/auth/success',
-        failureRedirect: '/auth/failure'
-    }));
+    router.post('/signup', passport.authenticate('local'), function(req, res){
+        res.sendStatus(200);
+    });
 
      //sends successful login state back to angular
     router.get('/success', function(req, res){
@@ -35,5 +34,4 @@ module.exports = function(passport){
     });
 
     return router;
-
 }
