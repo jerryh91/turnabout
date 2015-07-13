@@ -8,29 +8,22 @@ var filteredProfiles = [
     { id: "5", username: "goals23", image_src: "http://regent.blogs.com/photos/uncategorized/2008/12/23/83494618.jpg", points: "1408", detail: "I'm new in town. Looking for new friends." }
   ];
 
-
 router.route('/')
 .get(function(req, res) {
-
 	//Query from MongoDB
 	res.render('index', {title: 'express'});
-
 });
 
 router.route('/home')
 .get(function(req, res) {
-
 	//Query from MongoDB
 	res.render('home', {message: 'My message'});
-
 });
 
 router.route('/test1')
 .get(function(req, res) {
-
 	//Query from MongoDB
 	res.render('test1', {title: 'express'});
-
 });
 
 router.route('/test2')
