@@ -15,6 +15,7 @@ var models = require('./models/models.js'); // 'var models' not used anywhere ye
 var authenticate = require('./routes/authenticate')(passport); //router
 var session = require('express-session');
 var initPassport = require('./passport-init'); //needs models.js to be loaded first
+var debug = require('debug')('app');
 
 // Initialize Passport
 initPassport(passport);
@@ -28,15 +29,14 @@ var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
-//middleware:
 app.use(favicon(__dirname + '/public/favicon.ico'));
 app.use(logger('dev'));
-app.use(session({secret: 'our secret', 
-                 saveUninitialized: true,
-                 resave: true}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(session({secret: 'our secret', 
+                 saveUninitialized: true,
+                 resave: true}));
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -75,11 +75,12 @@ if(app.get('env') === 'development') {
   });
 }
 
-module.exports = app;
-
 //function() is invoked when request 
 //is received in at specified port
 app.listen(1337, function()
 {
   console.log('ready on port 1337');
+  debug('testing debug tool...');
 });
+
+module.exports = app;
