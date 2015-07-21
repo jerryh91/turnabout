@@ -15,3 +15,6 @@ Running express app
 2. navigate to project directory
 3. run "node app"
 4. Open safari and go to localhost:1337
+
+Using nodemon and debug modules
+- command to use: "DEBUG=app nodemon app"

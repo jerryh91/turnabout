@@ -34,6 +34,10 @@ mainApp.config(['$routeProvider', function($routeProvider) {
         templateUrl: 'browse',
         controller: 'BrowseController'
       }).
+      when('/signout',{
+        templateUrl: 'auth/signout',
+        controller: 'HomeController'
+      }).
       otherwise({
         redirectTo: '/home'
       });
@@ -99,11 +103,22 @@ mainApp.controller('CreateProfileController', function($scope, $location, $http)
   $scope.createProfile = function() {
     $http.post('/auth/signup', $scope.profile)
     .success(function(data, status, headers, config){
+      // $http({
+      //   url: '/auth/success', 
+      //   method: "GET"
+      // })
+      //.success(function(response) {
         console.log(data);
+        console.log(status);
+        console.log(headers);
+        console.log(config);
+
+        $location.path('/home');
+      //});
     })
     .error(function(data, status, headers, config){
-        /*handle non 200 statuses*/
-        console.log('error posting');
+      /*handle non 200 statuses*/
+      console.log('error posting');
     });
   };
 });

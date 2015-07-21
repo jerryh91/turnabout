@@ -1,5 +1,4 @@
-var express = require('express');
-var router = express.Router();
+var router = require('express').Router();
 
 module.exports = function(passport){
 
@@ -10,15 +9,17 @@ module.exports = function(passport){
     // }));
 
     //sign up
-    router.post('/signup', passport.authenticate('local'), function(req, res){
-        res.sendStatus(200);
+    router.post('/signup', passport.authenticate('signup'), function(req, res){
+        console.log(req.user);
+        //res.sendStatus(200);
+        res.send(req.user);
     });
 
      //sends successful login state back to angular
     router.get('/success', function(req, res){
         console.log("went through the /success GET");
         res.send({state: 'success', user: req.user ? req.user : null});
-    });
+    });  
 
     //sends failure login state back to angular
     router.get('/failure', function(req, res){
@@ -30,7 +31,8 @@ module.exports = function(passport){
     router.get('/signout', function(req, res) {
         //.logout(): a passport function
         req.logout();
-        res.redirect('/');
+        //res.redirect('/');
+        res.render('index', {title: 'express'});
     });
 
     return router;
