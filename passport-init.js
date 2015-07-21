@@ -23,6 +23,7 @@ module.exports = function (passport)
 
     passport.deserializeUser(function(id, done) 
     {
+        console.log('deserializeUser');
         //Find user with _id
         User.findById (id, function (err, user)
         {
@@ -36,19 +37,13 @@ module.exports = function (passport)
             return done('user not found', false);
           }
           //return user obj to passport
-          return done(user, true);
+          return done(null, user);
         })
     
     });
 
     passport.use('login', new LocalStrategy(
-    {
-            passReqToCallback : true,
-            usernameField: 'username', // this is the default, but adding for clarity
-            passwordField: 'password'  // this is the default, but adding for clarity
-    },
-    
-      function(req, username, password, done) 
+      function(username, password, done) 
       { 
 
             User.findOne({'username' : username}, function(err, user){
@@ -75,15 +70,9 @@ module.exports = function (passport)
     ));
 
     passport.use('signup', new LocalStrategy(
-    {
-        passReqToCallback : true,
-        usernameField: 'username', // this is the default, but adding for clarity
-        passwordField: 'password'  // this is the default, but adding for clarity
-    },
-
       //passport can parse 
       //username, password from a form body
-      function (req, username, password, done)
+      function (username, password, done)
       { 
           console.log("in signup");
         // console.log('signup function callback');
