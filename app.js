@@ -24,6 +24,7 @@ mongoose.connect('mongodb://localhost:27017/whysosingle');
 
 var app = express();
 
+var port = 1337;
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -77,9 +78,20 @@ if(app.get('env') === 'development') {
 
 module.exports = app;
 
-//function() is invoked when request 
-//is received in at specified port
-app.listen(1337, function()
+
+//Passed the ExpressJS server to Socket.io. 
+//In effect, our real time communication will still happen on the same port.
+var io = require('socket.io').listen(app.listen(port, function()
 {
-  console.log('ready on port 1337');
+  console.log('ready on port: ' + port);
+}));
+
+io.sockets.on('connection', function (socket) 
+{
+  //register custom event:"my_message"
+    socket.emit('my_message', { message: 'welcome to the chat' });
+    socket.on('send', function (data) {
+      //Broadcast user sent data to all other sockets
+        io.sockets.emit('my_message', data);
+    });
 });

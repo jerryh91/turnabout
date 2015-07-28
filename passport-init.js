@@ -76,9 +76,10 @@ module.exports = function (passport)
 
     passport.use('signup', new LocalStrategy(
     {
-        passReqToCallback : true,
+        
         usernameField: 'username', // this is the default, but adding for clarity
-        passwordField: 'password'  // this is the default, but adding for clarity
+        passwordField: 'password',  // this is the default, but adding for clarity
+        passReqToCallback : true
     },
 
       //passport can parse 
@@ -92,7 +93,7 @@ module.exports = function (passport)
                 if (err)
                 {
                   console.log('err');
-                  return done(err, false);
+                  return done(err);
                 }
                 
                 if (user)

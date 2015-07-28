@@ -25,11 +25,12 @@ router.route('/home')
 
 });
 
-router.route('/test1')
+//Messages List View
+router.route('/messages')
 .get(function(req, res) {
 
 	//Query from MongoDB
-	res.render('test1', {title: 'express'});
+	res.render('message_pg');
 
 });
 
@@ -37,7 +38,7 @@ router.route('/test2')
 .get(function(req, res) {
 
 	//Query from MongoDB
-	res.render('test2', {title: 'express'});
+	res.render('test2', {message: 'express'});
 
 });
 
