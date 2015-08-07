@@ -1,2 +1,11 @@
 <h2>Welcome to WhySoSingle!</h2>
 {{message}}<br>
+
+<form class="simple-form" ng-submit="login()">
+  
+  <input type="email" class="form-control" ng-model="user.username" placeholder="Username" /><br />
+
+  <input type="text" class="form-control" ng-model="user.password" placeholder="Password" /><br />
+  
+  <button class="btn btn-default">Login</button>
+</form>

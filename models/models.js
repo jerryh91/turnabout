@@ -13,7 +13,11 @@ var mongoose = require('mongoose');
 var userSchema = new mongoose.Schema({
     username: String,
     password: String, //hash created from password
-    created_at: {type: Date, default: Date.now}
+    created_at: {type: Date, default: Date.now},
+    email: String,
+    location: String,
+    age: String,
+    gender: String
 });
 
 var postSchema = new mongoose.Schema({

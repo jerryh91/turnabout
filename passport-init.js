@@ -29,14 +29,17 @@ module.exports = function (passport)
         {
           if (err)
           {
+            console.log('error');
             return done(err, false);
           }
 
           if (!user)
           {
+            console.log('user not found');
             return done('user not found', false);
           }
           //return user obj to passport
+          console.log('user found!');
           return done(null, user);
         })
     
@@ -46,20 +49,23 @@ module.exports = function (passport)
       function(username, password, done) 
       { 
 
-            User.findOne({'username' : username}, function(err, user){
+            User.findOne({'email' : username}, function(err, user){
 
               if (err)
               {
+                console.log("db error");
                 return done("db err: "+ err, false);
               }
 
               if (!user)
               {
+                console.log("User doesn't exist in db");
                 //User doesn't exist in db
                 return done('user:' + username + 'NOT in db', false);
               }
               else if (!isValidPwd(user, password))
               {
+                console.log('incorrect password');
                 return done('user:  '+ username + 'incorrect password', false);
               }
               //Successful login
@@ -69,25 +75,22 @@ module.exports = function (passport)
       }
     ));
 
-    passport.use('signup', new LocalStrategy(
-    {
-        
-        usernameField: 'username', // this is the default, but adding for clarity
-        passwordField: 'password',  // this is the default, but adding for clarity
-        passReqToCallback : true
+    passport.use('signup', new LocalStrategy({
+        passReqToCallback : true // allows us to pass back the entire request to the callback
     },
       //passport can parse 
       //username, password from a form body
-      function (username, password, done)
+      function (req, username, password, done)
       { 
           console.log("in signup");
+          //console.log(req);
         // console.log('signup function callback');
           User.findOne({'username': username}, function(err, user)
           {
                 if (err)
                 {
                   console.log('err');
-                  return done(err);
+                  return done(err, false);
                 }
                 
                 if (user)
@@ -102,6 +105,10 @@ module.exports = function (passport)
                   var newUser = new User ();
                   newUser.username = username;
                   newUser.password = createHash(password);
+                  newUser.email = req.body.email;
+                  newUser.location = req.body.location;
+                  newUser.age = req.body.age;
+                  newUser.gender = req.body.gender;
 
                   newUser.save(function(err, newUser)
                     {

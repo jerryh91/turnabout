@@ -109,9 +109,9 @@ mainApp.controller('CreateProfileController', function($scope, $location, $http)
       // })
       //.success(function(response) {
         console.log(data);
-        console.log(status);
-        console.log(headers);
-        console.log(config);
+        // console.log(status);
+        // console.log(headers);
+        // console.log(config);
 
         $location.path('/home');
       //});
@@ -196,8 +196,22 @@ mainApp.controller('Test2Controller', function($scope, $routeParams) {
     $scope.message = 'This message came from the Test2Controller and had parameters.';
 });
 
-mainApp.controller('HomeController', function($scope, $routeParams) {
+mainApp.controller('HomeController', function($scope, $routeParams, $http, $location) {
     $scope.message = 'We\'re glad to have you. To get started, select Browse Profiles from the dropdown menu in the navigation bar.';
+    $scope.user = { username: "marcus.a.bennett@gmail.com",
+                    password: "asdf"};
+    
+    $scope.login = function(){
+      $http.post('/auth/login', $scope.user)
+      .success(function(data, status, headers, config){
+          console.log(data);
+          $location.path('/home');
+      })
+      .error(function(data, status, headers, config){
+        /*handle non 200 statuses*/
+        console.log('error posting');
+      });
+    };
 });
 
 // function searchProfiles(json){

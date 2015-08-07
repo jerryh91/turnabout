@@ -3,10 +3,10 @@ var router = require('express').Router();
 module.exports = function(passport){
 
     //log in
-    // router.post('/login', passport.authenticate('login', {
-    //     successRedirect: '/auth/success',
-    //     failureRedirect: '/auth/failure'
-    // }));
+    router.post('/login', passport.authenticate('login', {
+        successRedirect: '/auth/success',
+        failureRedirect: '/auth/failure'
+    }));
 
     //sign up
     router.post('/signup', passport.authenticate('signup'), function(req, res){
