@@ -11,7 +11,7 @@ var filteredProfiles = [
 router.route('/')
 .get(function(req, res) {
 	//Query from MongoDB
-	res.render('index', {title: 'express'});
+	res.render('index', {title: 'Turnabout'});
 });
 
 router.route('/home')
@@ -20,35 +20,39 @@ router.route('/home')
 	res.render('home', {message: 'My message'});
 });
 
+router.route('/about')
+.get(function(req, res) {
+	//Query from MongoDB
+	res.render('about', {message: 'My message'});
+});
+
 //Messages List View
 router.route('/messages')
 .get(function(req, res) {
 	//Query from MongoDB
 	res.render('message_pg');
-
 });
 
-router.route('/test2')
-.get(function(req, res) {
-
-	//Query from MongoDB
-	res.render('test2', {message: 'express'});
-
+router.route('/login')
+.get(function(req, res){
+	res.render('login');
 });
 
 router.route('/browse')
 .get(function(req, res) {
-
 	//Query from MongoDB
 	res.render('browse', {title: 'express'});
-
 });
 
-router.route('/profile')
+router.route('/profiles')
 .get(function(req, res) {
 	//Query from MongoDB
 	res.render('profile', {title: 'express'});
+});
 
+router.route('/blog')
+.get(function(req, res) {
+	res.render('blog', {title: 'express'});
 });
 
 router.route('/search')
@@ -66,38 +70,12 @@ router.route('/createProfile')
 	res.render('createProfile', {title: 'Sign Up!'});
 });
 
-router.route('/page2')
-.get(function(req, res) {
-
-	//Query data from MongoDB
-
-	//package as JSON
-	var data = {name: 'Jerry', supplies:['broom', 'mop', 'dustpan']};
-	res.render('page2',  data);
-
-});
-
-//RESTFul API: CRUD
-router.route('/profiles')
-
-//req: from client
-//res: from server
-
-.get(function(req, res) {
-
-	//Query from MongoDB
-	res.send({message: 'Return all profiles'});
-
-});
-
-// /profiles/:<any alpha numeric>
-
 router.route('/profiles/:id')
 .get(function(req, res) {
 
 		var profileID = req.params.id;
 		//Query profileID from MongoDB
-		res.send({message: 'Return profile: ' + profileID});
+		res.json(filteredProfiles[0]);
 })
 
 //.put: update existing profile with id

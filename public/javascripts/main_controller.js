@@ -1,26 +1,24 @@
 var mainApp = angular.module('WhySoSingle', ['ngRoute']);
 
+//$locationProvider.html5Mode(true);
+
 mainApp.config(['$routeProvider', function($routeProvider) {
     $routeProvider.
-      when('/test1', {
-        templateUrl: 'test1',
-        controller: 'Test1Controller'
-      }).
-      when('/test2/:inputParam', {
-        templateUrl: 'test2',
-        controller: 'Test2Controller'
-      }).
       when('/browse', {
         templateUrl: 'browse',
         controller: 'BrowseController'
       }).
-      when('/browse/:username',{
-        templateUrl: 'profile',
+      when('/profiles/:username',{
+        templateUrl: 'profiles',
         controller: 'ProfileController'
       }).
       when('/home',{
         templateUrl: 'home',
         controller: 'HomeController'
+      }).
+      when('/about',{
+        templateUrl: 'about',
+        controller: 'AboutController'
       }).
       when('/createProfile',{
         templateUrl: 'createProfile',
@@ -34,14 +32,50 @@ mainApp.config(['$routeProvider', function($routeProvider) {
         templateUrl: 'browse',
         controller: 'BrowseController'
       }).
-      when('/signout',{
-        templateUrl: 'auth/signout',
-        controller: 'HomeController'
+      when('/login',{
+        templateUrl: 'login',
+        controller: 'LoginController'
+      }).
+      when('/blog', {
+        templateUrl: 'blog'
+      }).
+      when('/messages', {
+        templateUrl: 'messages',
+        controller: 'MessagesController'
       }).
       otherwise({
-        redirectTo: '/home'
+        redirectTo: '/about'
       });
   }]);
+
+mainApp.factory('userSessionService', function(){
+  var defaultSession = {};
+  var userSession = defaultSession;
+  
+
+  var resetUserSession = function() {
+    userSession = defaultSession;
+  }
+
+  var setUserSession = function(newObj) {
+    userSession = newObj;
+  };
+
+  var getUserSession = function(){
+    return userSession;
+  };
+
+  var isLoggedIn = function(){
+    return userSession.hasOwnProperty('username');
+  };
+
+  return {
+    setUserSession: setUserSession,
+    getUserSession: getUserSession,
+    resetUserSession: resetUserSession,
+    isLoggedIn: isLoggedIn
+  };
+});
 
 mainApp.service('searchService', function() {
   var searchResults = [];
@@ -49,11 +83,11 @@ mainApp.service('searchService', function() {
 
   var setSearch = function(newObj) {
     searchQuery = newObj;
-  }
+  };
 
   var getSearch = function(){
     return searchQuery;
-  }
+  };
 
   var setResults = function(newObj) {
       searchResults = newObj;
@@ -69,13 +103,44 @@ mainApp.service('searchService', function() {
     setSearch: setSearch,
     getSearch: getSearch
   };
-
 });
 
-mainApp.controller('MainController', function($scope, $route, $routeParams, $location) {
+mainApp.controller('MainController', function($scope, $route, $routeParams, $location, $http, userSessionService) {
+  //console.log(userSessionService.isLoggedIn());
   $scope.$route = $route;
   $scope.$routeParams = $routeParams;
   $scope.$location = $location;
+  $http({
+      url: '/auth/loggedIn', 
+      method: "GET"
+    })
+    .success(function(response) {
+      //console.log(response);
+      if(response.notLoggedIn){
+        userSessionService.resetUserSession();
+      } else {
+        userSessionService.setUserSession(response);
+
+      }
+    });
+  $scope.userSession = userSessionService;
+  $scope.logout = function() {
+    $http({
+      url: '/auth/signout', 
+      method: "GET"
+    })
+    .success(function(response) {
+      $location.path('/');
+    });
+  };
+  $scope.goToHome = function() {
+    if(userSessionService.isLoggedIn()){
+      $location.path('/home');
+    }
+    else {
+      $location.path('/about');
+    }
+  };
 });
 
 mainApp.controller('BrowseController', function($scope, $routeParams, $location, searchService) {
@@ -85,6 +150,10 @@ mainApp.controller('BrowseController', function($scope, $routeParams, $location,
   $scope.groupName = "Men";
   $scope.searchCriteria = "Location: " + search.location + "|Radius: " + search.radius;
   $scope.profiles = results;
+});
+
+mainApp.controller('MessagesController', function($scope){
+
 });
 
 mainApp.controller('CreateProfileController', function($scope, $location, $http) {
@@ -113,7 +182,7 @@ mainApp.controller('CreateProfileController', function($scope, $location, $http)
         // console.log(headers);
         // console.log(config);
 
-        $location.path('/home');
+        $location.path('/login');
       //});
     })
     .error(function(data, status, headers, config){
@@ -180,23 +249,39 @@ mainApp.controller('SearchController', function($scope, $routeParams, $location,
   };
 });
 
-mainApp.controller('ProfileController', function($scope, $routeParams) { 
-  $scope.username = $routeParams.username;
-  $scope.groupName = "Men";
-  $scope.searchCriteria = "Location: Austin | Age range: 21-30";
-  $scope.userProfile = getProfile($routeParams.username);
+mainApp.controller('ProfileController', function($scope, $routeParams, $http) { 
+  $http({
+      url: '/profiles/' + $routeParams.username, 
+      method: "GET"
+    })
+    .success(function(response) {
+      console.log(response);
+      $scope.userProfile = response;
+    });
 });
 
-mainApp.controller('Test1Controller', function($scope, $routeParams) {
-    $scope.message = 'This message came from the Test1Controller.';
+mainApp.controller('HomeController', function($scope) {
+    $scope.message = 'This is the Home screen.';
 });
 
-mainApp.controller('Test2Controller', function($scope, $routeParams) {
-    $scope.params = $routeParams;
-    $scope.message = 'This message came from the Test2Controller and had parameters.';
+mainApp.controller('AboutController', function($scope, $location, $http, userSessionService) {
+    $scope.message = 'We\'re glad to have you. To get started, signup or login below.';
+    $http({
+      url: '/auth/loggedIn', 
+      method: "GET"
+    })
+    .success(function(response) {
+      //console.log(response);
+      if(response.notLoggedIn){
+        userSessionService.resetUserSession();
+      } else {
+        userSessionService.setUserSession(response);
+        $location.path('/home');
+      }
+    });
 });
 
-mainApp.controller('HomeController', function($scope, $routeParams, $http, $location) {
+mainApp.controller('LoginController', function($scope, $routeParams, $http, $location, userSessionService) {
     $scope.message = 'We\'re glad to have you. To get started, select Browse Profiles from the dropdown menu in the navigation bar.';
     $scope.user = { username: "marcus.a.bennett@gmail.com",
                     password: "asdf"};
@@ -204,7 +289,7 @@ mainApp.controller('HomeController', function($scope, $routeParams, $http, $loca
     $scope.login = function(){
       $http.post('/auth/login', $scope.user)
       .success(function(data, status, headers, config){
-          console.log(data);
+          userSessionService.setUserSession(data.user);
           $location.path('/home');
       })
       .error(function(data, status, headers, config){
@@ -213,45 +298,3 @@ mainApp.controller('HomeController', function($scope, $routeParams, $http, $loca
       });
     };
 });
-
-// function searchProfiles(json){
-//   //console.log("JSON was " + json);
-//   searchCrit = json;
-//   filteredProfiles = [
-//     { id: "1", username: "BobbyBoy", image_src: "http://24.media.tumblr.com/tumblr_m3fqbmn8cF1qe4cuxo1_500.jpg", points: "628", detail: "I live by myself, I pay my own rent, I wear socks that match and I love my mom. I am a confident, attractive & comedic person. I do stunt work. Have you ever seen it in a movie when a hot actor has to reveal his naked ass? That’s my job. Oh, and I’m in the fitness biz, as well as back in school finishing up my pre-med reqs." },
-//     { id: "2", username: "some_guy", image_src: "http://25.media.tumblr.com/tumblr_m3d737UrjX1rurzxho1_400.jpg", points: "2043", detail: "Basically I love life and I love living life. I enjoy the outdoors, traveling, restaurants, laughing, goIng to cultural events, and sociaLizing with quality peOple. Its just better liVing and sharing lifE with someone else"},
-//     { id: "3", username: "ns_3225", image_src: "https://s-media-cache-ak0.pinimg.com/236x/9b/13/83/9b13836f4523e4fb332aa588b3ba1cf1.jpg", points: "105", detail: "64% Introvert, 36% Extrovert. Analytical, kinesthetic thinker. The spotlight is not my friend. Anti-planner, pro spontaneity. A shy geek and a smooth operator…. that’s approximately me." },
-//     { id: "4", username: "THEONEANDONLY", image_src: "https://s-media-cache-ak0.pinimg.com/236x/5c/3c/fa/5c3cfadac848470ae8f00c0b1e2aa4ae.jpg", points: "4123", detail: "Hey :)" },
-//     { id: "5", username: "goals23", image_src: "http://regent.blogs.com/photos/uncategorized/2008/12/23/83494618.jpg", points: "1408", detail: "I'm new in town. Looking for new friends." }
-//   ];
-// }
-
-// function getProfiles(){
-//   return [
-//     { id: "1", username: "BobbyBoy", image_src: "http://24.media.tumblr.com/tumblr_m3fqbmn8cF1qe4cuxo1_500.jpg", points: "628", detail: "I live by myself, I pay my own rent, I wear socks that match and I love my mom. I am a confident, attractive & comedic person. I do stunt work. Have you ever seen it in a movie when a hot actor has to reveal his naked ass? That’s my job. Oh, and I’m in the fitness biz, as well as back in school finishing up my pre-med reqs." },
-//     { id: "2", username: "some_guy", image_src: "http://25.media.tumblr.com/tumblr_m3d737UrjX1rurzxho1_400.jpg", points: "2043", detail: "Basically I love life and I love living life. I enjoy the outdoors, traveling, restaurants, laughing, goIng to cultural events, and sociaLizing with quality peOple. Its just better liVing and sharing lifE with someone else"},
-//     { id: "3", username: "ns_3225", image_src: "https://s-media-cache-ak0.pinimg.com/236x/9b/13/83/9b13836f4523e4fb332aa588b3ba1cf1.jpg", points: "105", detail: "64% Introvert, 36% Extrovert. Analytical, kinesthetic thinker. The spotlight is not my friend. Anti-planner, pro spontaneity. A shy geek and a smooth operator…. that’s approximately me." },
-//     { id: "4", username: "THEONEANDONLY", image_src: "https://s-media-cache-ak0.pinimg.com/236x/5c/3c/fa/5c3cfadac848470ae8f00c0b1e2aa4ae.jpg", points: "4123", detail: "Hey :)" },
-//     { id: "5", username: "goals23", image_src: "http://regent.blogs.com/photos/uncategorized/2008/12/23/83494618.jpg", points: "1408", detail: "I'm new in town. Looking for new friends." }
-//   ];
-// }
-
-// function getProfiles(filters){
-//   return [
-//     { id: "1", username: "BobbyBoy", image_src: "http://24.media.tumblr.com/tumblr_m3fqbmn8cF1qe4cuxo1_500.jpg", points: "628", detail: "I live by myself, I pay my own rent, I wear socks that match and I love my mom. I am a confident, attractive & comedic person. I do stunt work. Have you ever seen it in a movie when a hot actor has to reveal his naked ass? That’s my job. Oh, and I’m in the fitness biz, as well as back in school finishing up my pre-med reqs." },
-//     { id: "2", username: "some_guy", image_src: "http://25.media.tumblr.com/tumblr_m3d737UrjX1rurzxho1_400.jpg", points: "2043", detail: "Basically I love life and I love living life. I enjoy the outdoors, traveling, restaurants, laughing, goIng to cultural events, and sociaLizing with quality peOple. Its just better liVing and sharing lifE with someone else"},
-//     { id: "3", username: "ns_3225", image_src: "https://s-media-cache-ak0.pinimg.com/236x/9b/13/83/9b13836f4523e4fb332aa588b3ba1cf1.jpg", points: "105", detail: "64% Introvert, 36% Extrovert. Analytical, kinesthetic thinker. The spotlight is not my friend. Anti-planner, pro spontaneity. A shy geek and a smooth operator…. that’s approximately me." },
-//     { id: "4", username: "THEONEANDONLY", image_src: "https://s-media-cache-ak0.pinimg.com/236x/5c/3c/fa/5c3cfadac848470ae8f00c0b1e2aa4ae.jpg", points: "4123", detail: "Hey :)" },
-//     { id: "5", username: "goals23", image_src: "http://regent.blogs.com/photos/uncategorized/2008/12/23/83494618.jpg", points: "1408", detail: "I'm new in town. Looking for new friends." }
-//   ];
-// }
-
-// function getProfile(username){
-//   var profiles = getProfiles();
-//   for(i=0; i<profiles.length; i++){
-//     if(profiles[i].username == username){
-//       return profiles[i];
-//     }
-//   }
-//   return null;
-// }

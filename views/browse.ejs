@@ -1,15 +1,17 @@
-<div class="page-header">
-  <h1> {{ groupName }} <small> {{ searchCriteria }} </small></h1>
-</div>
+<div class="container">
+  <div class="page-header">
+    <h1> {{ groupName }} <small> {{ searchCriteria }} </small></h1>
+  </div>
 
-<div id="theList" class="list-group">
-  <li class="thumbnail col-sm-12" ng-repeat="profile in profiles">
-    <a href="{{fileLocation.absUrl()}}/{{profile.username}}"><img class="col-sm-4" ng-src="{{ profile.image_src }}"></a>
-    <div class="caption col-sm-8">
-      <h2>{{ profile.username }}</h2>
-      <h4>{{ profile.points }}Ƥ</h4>
-      <p>{{profile.detail}}</p>
-      <p><a href="#" class="btn btn-primary" role="button">Like</a></p>
-    </div>
-  </li>
+  <div id="theList" class="list-group">
+    <li class="thumbnail col-sm-12" ng-repeat="profile in profiles">
+      <a href="{{fileLocation.absUrl()}}/{{profile.username}}"><img class="col-sm-4" ng-src="{{ profile.image_src }}"></a>
+      <div class="caption col-sm-8">
+        <h2>{{ profile.username }}</h2>
+        <h4>{{ profile.points }}Ƥ</h4>
+        <p>{{profile.detail}}</p>
+        <p><a href="#" class="btn btn-primary" role="button">Like</a></p>
+      </div>
+    </li>
+  </div>
 </div>

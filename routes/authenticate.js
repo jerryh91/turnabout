@@ -2,6 +2,15 @@ var router = require('express').Router();
 
 module.exports = function(passport){
 
+    //check logged in
+    router.get('/loggedIn', function(req, res) {
+        if(req.user){
+            res.json(req.user);
+        } else {
+            res.json({"notLoggedIn": "true"});
+        }
+    });
+
     //log in
     router.post('/login', passport.authenticate('login', {
         successRedirect: '/auth/success',
