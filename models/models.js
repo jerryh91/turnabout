@@ -17,22 +17,22 @@ var userSchema = new mongoose.Schema({
     email: String,
     location: String,
     age: String,
-    gender: String
+    gender: String,
+    conversations: [{conversationID: String}]
 });
 
-var postSchema = new mongoose.Schema({
-	//fk:"created_by" to pk user username
-    // created_by: {type: Schema.ObjectId, ref: 'User' },
-    username: String,
-    created_at: {type: Date, default: Date.now},
-    text: String
+var conversationSchema = new mongoose.Schema({
+    conversationID: String,
+    initiator: String,
+    responder: String,
+    messages: [{author: String, message: String}]
 });
 
-//Model declaration: "User", "Post"
+//Model declaration: "User", "Conversation"
 mongoose.model("User", userSchema);
-mongoose.model("Post", postSchema);
+mongoose.model("Conversation", conversationSchema);
 
 module.exports = {
 	userSchema: userSchema,
-	postSchema: postSchema
+    conversationSchema: conversationSchema
 };

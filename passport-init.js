@@ -3,7 +3,6 @@ var LocalStrategy = require('passport-local').Strategy;
 var bCrypt = require('bcrypt-nodejs');
 var mongoose = require('mongoose');
 var User = mongoose.model('User');
-var Post = mongoose.model('Post');
 
 module.exports = function (passport)
 {
@@ -89,7 +88,7 @@ module.exports = function (passport)
           {
                 if (err)
                 {
-                  console.log('err');
+                  console.log(err);
                   return done(err, false);
                 }
                 

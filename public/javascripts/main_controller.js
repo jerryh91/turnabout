@@ -152,8 +152,15 @@ mainApp.controller('BrowseController', function($scope, $routeParams, $location,
   $scope.profiles = results;
 });
 
-mainApp.controller('MessagesController', function($scope){
-
+mainApp.controller('MessagesController', function($scope, $http, userSessionService){
+  $scope.username = userSessionService.getUserSession().username;
+  $http({
+      url: '/loadMessages/' + $scope.username, 
+      method: "GET"
+    })
+    .success(function(response) {
+      console.log(response);
+    });
 });
 
 mainApp.controller('CreateProfileController', function($scope, $location, $http) {
@@ -255,7 +262,6 @@ mainApp.controller('ProfileController', function($scope, $routeParams, $http) {
       method: "GET"
     })
     .success(function(response) {
-      console.log(response);
       $scope.userProfile = response;
     });
 });

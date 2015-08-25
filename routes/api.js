@@ -7,6 +7,9 @@ var filteredProfiles = [
     { id: "4", username: "THEONEANDONLY", image_src: "https://s-media-cache-ak0.pinimg.com/236x/5c/3c/fa/5c3cfadac848470ae8f00c0b1e2aa4ae.jpg", points: "4123", detail: "Hey :)" },
     { id: "5", username: "goals23", image_src: "http://regent.blogs.com/photos/uncategorized/2008/12/23/83494618.jpg", points: "1408", detail: "I'm new in town. Looking for new friends." }
   ];
+var mongoose = require('mongoose');
+var User = mongoose.model('User');
+var Conversation = mongoose.model('Conversation');
 
 router.route('/')
 .get(function(req, res) {
@@ -70,29 +73,66 @@ router.route('/createProfile')
 	res.render('createProfile', {title: 'Sign Up!'});
 });
 
+router.route('/loadMessages/:requestingUser')
+.get(function(req, res) {
+	User.findOne({'username': req.params.requestingUser}, function(err, user){
+		if(err){
+			console.log(err);
+			return;
+		}
+		if(user){
+			console.log("User found: " + req.params.requestingUser);
+			if(user.conversations){
+				var foundConversations = [];
+				for(var i = 0; i < user.conversations.length; i++){
+					console.log("user.conversations[i]: " + user.conversations[i]);
+					Conversation.findOne({'conversationID': user.conversations[i].conversationID}, function(err, conversation){
+						if(err){
+							console.log("error here");
+						}
+						if(conversation){
+							console.log("conversation found")
+							console.log(conversation);
+							foundConversations.push(conversation);
+						} else {
+							console.log("conversation not found");
+						}
+						if(foundConversations.length == user.conversations.length){
+							res.json(foundConversations);
+						}
+					});
+				}
+			}
+		} else{
+			console.log("User does not exist");
+			return;
+		}
+	});
+});
+
 router.route('/profiles/:id')
 .get(function(req, res) {
 
 		var profileID = req.params.id;
 		//Query profileID from MongoDB
 		res.json(filteredProfiles[0]);
-})
+});
 
 //.put: update existing profile with id
-.put(function(req, res) {
+// .put(function(req, res) {
 
-		var profileID = req.params.id;
-		//Query profileID from MongoDB
-		res.send({message: 'Update profile: ' + profileID})
+// 		var profileID = req.params.id;
+// 		//Query profileID from MongoDB
+// 		res.send({message: 'Update profile: ' + profileID});
 
-})
+// })
 
-.delete(function(req, res) {
+// .delete(function(req, res) {
 
-		var profileID = req.params.id;
-		//delete profileID from MongoDB
-		res.send({message: 'Delete profile: ' + profileID})
+// 		var profileID = req.params.id;
+// 		//delete profileID from MongoDB
+// 		res.send({message: 'Delete profile: ' + profileID});
 
-})
+//});
 
 module.exports = router;
