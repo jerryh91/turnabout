@@ -91,6 +91,8 @@ io.sockets.on('connection', function (socket)
     socket.on('send', function (data) {
       //Broadcast user sent data to all other sockets
         io.sockets.emit('my_message', data);
+
+        //Capture new message string.
     });
 });
 module.exports = app;
