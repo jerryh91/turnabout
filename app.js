@@ -45,11 +45,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Make our db accessible to our router
-app.use(function(req,res,next){
-    req.db = db;
-    next();
-});
+
 
 //map routers to uri
 app.use('/', api);
