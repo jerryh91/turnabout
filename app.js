@@ -6,8 +6,10 @@ var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
+
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+
 var passport = require('passport');
 var mongoose = require('mongoose'); //Object Data Mapper: mongoose enforces Schema 
 var models = require('./models/models.js'); // 'var models' not used anywhere yet
@@ -16,6 +18,7 @@ var authenticate = require('./routes/authenticate')(passport); //router
 var session = require('express-session');
 var initPassport = require('./passport-init'); //needs models.js to be loaded first
 var debug = require('debug')('app');
+
 
 // Initialize Passport
 initPassport(passport);
@@ -34,13 +37,19 @@ app.use(favicon(__dirname + '/public/favicon.ico'));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
+app.use(cookieParser('my_secret'));
 app.use(session({secret: 'our secret', 
                  saveUninitialized: true,
                  resave: true}));
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Make our db accessible to our router
+app.use(function(req,res,next){
+    req.db = db;
+    next();
+});
 
 //map routers to uri
 app.use('/', api);
@@ -89,10 +98,23 @@ io.sockets.on('connection', function (socket)
   //register custom event:"my_message"
     socket.emit('my_message', { message: 'welcome to the chat' });
     socket.on('send', function (data) {
-      //Broadcast user sent data to all other sockets
-        io.sockets.emit('my_message', data);
+    //Broadcast user sent data to all other sockets
+    io.sockets.emit('my_message', data);
 
-        //Capture new message string.
+    //Capture new msg str: 
+    //Needs ID user who sent msg: session ID from Cookie?
+    if(socket.handshake.headers.cookie) 
+    {
+        console.log("Cookie found");
+        var cookie = cookie.parse(socket.handshake.headers.cookie);
+        // var sessionID = parseSignedCookie(cookie['connect.sid'], 'secret');
+    }
+
+    //Check database for hash matching between stored and sent
+
+    //Add to database with set to expire hash
+
+
     });
 });
 module.exports = app;

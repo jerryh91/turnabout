@@ -44,7 +44,7 @@ window.onload = function() {
         var text = "";
         text += field.value;
         
-        //Send to 
+        //Send "text"
     };
  
 }

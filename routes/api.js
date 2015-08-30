@@ -32,7 +32,8 @@ router.route('/about')
 //Messages List View
 router.route('/messages')
 .get(function(req, res) {
-	//Query from MongoDB
+
+	//Add msgs to Db
 	res.render('message_pg');
 });
 
@@ -43,13 +44,13 @@ router.route('/login')
 
 router.route('/browse')
 .get(function(req, res) {
-	//Query from MongoDB
+
 	res.render('browse', {title: 'express'});
 });
 
 router.route('/profiles')
 .get(function(req, res) {
-	//Query from MongoDB
+
 	res.render('profile', {title: 'express'});
 });
 

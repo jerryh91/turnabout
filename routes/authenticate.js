@@ -6,6 +6,7 @@ module.exports = function(passport){
     router.get('/loggedIn', function(req, res) {
         if(req.user){
             res.json(req.user);
+
         } else {
             res.json({"notLoggedIn": "true"});
         }
