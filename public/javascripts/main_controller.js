@@ -1,4 +1,4 @@
-var mainApp = angular.module('WhySoSingle', ['ngRoute']);
+var mainApp = angular.module('WhySoSingle', ['ngRoute', 'btford.socket-io']);
 
 //$locationProvider.html5Mode(true);
 
@@ -47,6 +47,44 @@ mainApp.config(['$routeProvider', function($routeProvider) {
         redirectTo: '/about'
       });
   }]);
+
+mainApp.factory('socket', function ($rootScope) {
+  var socket = io.connect();
+  return {
+    on: function (eventName, callback) {
+      socket.on(eventName, function () {  
+        var args = arguments;
+        $rootScope.$apply(function () {
+          callback.apply(socket, args);
+        });
+      });
+    },
+    emit: function (eventName, data, callback) {
+      socket.emit(eventName, data, function () {
+        var args = arguments;
+        $rootScope.$apply(function () {
+          if (callback) {
+            callback.apply(socket, args);
+          }
+        });
+      })
+    }
+  };
+});
+
+mainApp.factory('focus', function($timeout, $window) {
+  return function(id) {
+    // timeout makes sure that is invoked after any other event has been triggered.
+    // e.g. click events that need to run before the focus or
+    // inputs elements that are in a disabled state but are enabled when those events
+    // are triggered.
+    $timeout(function() {
+      var element = $window.document.getElementById(id);
+      if(element)
+        element.focus();
+    });
+  };
+});
 
 mainApp.factory('userSessionService', function(){
   var defaultSession = {};
@@ -152,7 +190,8 @@ mainApp.controller('BrowseController', function($scope, $routeParams, $location,
   $scope.profiles = results;
 });
 
-mainApp.controller('MessagesController', function($scope, $http, userSessionService){
+mainApp.controller('MessagesController', function($scope, $http, userSessionService, socket, focus){
+  $scope.messageDisplay = '';
   $scope.username = userSessionService.getUserSession().username;
   $http({
       url: '/loadMessages/' + $scope.username, 
@@ -161,6 +200,29 @@ mainApp.controller('MessagesController', function($scope, $http, userSessionServ
     .success(function(response) {
       console.log(response);
     });
+
+  socket.on('my_message', function(data){
+    if(data.message) 
+    {
+      $scope.messageDisplay += (data.username ? data.username : 'Server') + ': ' + data.message + '\n';
+    } else {
+      console.log("No msg: ", data.message);
+    }
+  });
+  
+  $scope.sendMessage = function () {
+    socket.emit('send', { message: $scope.messageContent, username: $scope.username });
+
+    // add the message to our model locally
+    //$scope.messageDisplay += 'You: ' + $scope.messageContent + '\n';
+
+    // clear message box
+    $scope.messageContent = '';
+
+    focus('field');
+
+  };
+
 });
 
 mainApp.controller('CreateProfileController', function($scope, $location, $http) {

@@ -86,14 +86,14 @@ var io = require('socket.io').listen(app.listen(port, function()
 
 io.sockets.on('connection', function (socket) 
 {
+  console.log('socket connection');
   //register custom event:"my_message"
-    socket.emit('my_message', { message: 'welcome to the chat' });
-    socket.on('send', function (data) {
-      //Broadcast user sent data to all other sockets
-        io.sockets.emit('my_message', data);
-
-        //Capture new message string.
-    });
+  socket.emit('my_message', { message: 'welcome to the chat' });
+  socket.on('send', function (data) {
+    //Broadcast user sent data to all other sockets
+      io.sockets.emit('my_message', data);
+      console.log("new message: " + data.message);
+  });
 });
 module.exports = app;
 
