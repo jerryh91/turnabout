@@ -1,19 +1,13 @@
-<script src="javascripts/chat.js"></script>
-<script src="/socket.io/socket.io.js"></script>
 <div class="container">
     <h1>Messages Page</h1>
     <div id="content" style='width: 500px; height: 300px; margin: 0 0 20px 0; border: solid 1px #999; overflow-y: scroll;'>
-        <b>Server: </b>
-            "Welcome to the Chat"
+        <pre>{{messageDisplay}}</pre>
         <br>    
     </div>
     <div class="controls">
-        "Name: "
-        <input id="name" style="width:350px;">
-        <br>
-        <br>
-        <input id="field" style="width:350px;">
-        <input id="send" type="button" value="send">
+        <form ng-submit="sendMessage()">
+            <input id="field" ng-model="messageContent" style="width:350px;">
+            <input id="send" type="button" ng-click="sendMessage()" value="send">
+        </form>
     </div>
-    <%= new Date() %>
 </div>
