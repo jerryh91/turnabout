@@ -3,6 +3,8 @@
 //
 
 var express = require('express');
+//var router = express.Router();
+var multer = require('multer');
 var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
@@ -18,6 +20,9 @@ var authenticate = require('./routes/authenticate')(passport); //router
 var session = require('express-session');
 var initPassport = require('./passport-init'); //needs models.js to be loaded first
 var debug = require('debug')('app');
+var upload = multer({ dest: 'uploads/'});
+
+var User = mongoose.model('User');
 
 
 // Initialize Passport
@@ -25,6 +30,40 @@ initPassport(passport);
 
 //Connect to MongoDB
 mongoose.connect('mongodb://localhost:27017/whysosingle');
+var conn = mongoose.connection;
+
+var fs = require('fs');
+var Grid = require('gridfs-stream')
+Grid.mongo = mongoose.mongo;
+
+var gfs;
+
+conn.once('open', function() {
+  console.log('mongoose connection open');
+  gfs = Grid(conn.db);
+  //streaming to gridfs
+  //filename to store in mongodb
+
+  //TEST WRITE
+  // var writestream = gfs.createWriteStream({
+  //   filename: 'mongo_file.ico'
+  // });
+  // fs.createReadStream(__dirname + '/public/favicon.ico').pipe(writestream);
+
+  // writestream.on('close', function(file){
+  //   console.log(file.filename + ': written to DB');
+
+  //   var fs_write_stream = fs.createWriteStream('THIS.ico'); 
+  //   var readstream = gfs.createReadStream({
+  //     filename: 'mongo_file.ico'
+  //   });
+  //   readstream.pipe(fs_write_stream);
+  //   fs_write_stream.on('close', function(){
+  //     console.log('file has been written!');
+  //   });
+
+  // });
+});
 
 var app = express();
 
@@ -50,6 +89,103 @@ app.use(express.static(path.join(__dirname, 'public')));
 //map routers to uri
 app.use('/', api);
 app.use('/auth', authenticate);
+
+app.post('/upload/photo', upload.single('profilePic'), function(req, res, next){
+    //multer handles multipart/form-data so we just need to grab req.file
+    uploadImg(req, res);
+});
+
+// app.get('/profile', function(req, res) {
+//   res.render('profile', {title: 'express', imageLink: 'public/temporaryimgs/test.jpg'});
+// });
+
+app.get('/profile/:id', function(req, res) {
+  // Has profile picture?
+  var pictureObject = req.user.photos[0];
+  if(pictureObject){
+    var pictureId = pictureObject.photoID;
+    var imgpath = 'temporaryimgs/' + pictureId + '.jpg';
+    var readstream = gfs.createReadStream({
+      _id: pictureId
+    });
+    // THIS PUSHES RAW BINARY TO CLIENT; DON'T KNOW HOW TO CONVERT TO IMAGE YET
+    // readstream.pipe(res);
+    var writestream = fs.createWriteStream('public/' + imgpath);
+    readstream.pipe(writestream);
+    writestream.on('close', function(file){
+      res.render('profile', {title: 'express', imageLink: imgpath});
+      // DON'T DELETE FILE BEFORE THE CLIENT GETS IT
+      // fs.unlink('public/' + imgpath, function(err){
+      //   if (err) {
+      //     console.error("Error: " + err);
+      //   } else {
+      //     console.log('successfully deleted : ' + 'public/' + imgpath);
+      //   }
+      //});
+    });
+
+    //Experiment to send raw binary to client (didn't work)  
+    //res.writeHead(200, {'Content-Type': 'image/jpeg'});
+    //res.write(data, 'binary');
+
+  } else {
+    res.render('profile', {title: 'express', imageLink: 'images/default.png'});
+  }
+
+
+});
+
+var uploadImg = function(req,res) {
+  var writestream = gfs.createWriteStream({
+    filename: req.file.name,
+    mode:'w',
+    content_type: req.file.mimetype,
+    metadata: req.body,
+  });
+  fs.createReadStream(req.file.path).pipe(writestream);
+  var username = req.user.username;
+  writestream.on('close', function (file) {
+    User.findOne({'username': username}, function(err, user)
+    {
+      if (err)
+      {
+        console.log(err);
+        //return done(err, false);
+      }
+      
+      if (user)
+      {
+        console.log('User found to add photo ID');
+        // use + '' to get the string output from ObjectId(...)
+        console.log(file._id + '');
+        User.update(
+          { "username" : username}, 
+          //{$push: {"photos" : {photoID: file._id + ''}}}, 
+          {"photos" : [{photoID: file._id + ''}]}, 
+          function(err, results) {
+            if (err)
+            {
+              console.log(err);
+              return (err, false);
+            }
+            console.log('Successfully added photoID to user. Results are: ' + results);
+            //return done(null, user);
+          });
+      } else
+      {
+        console.log('user does not exist');
+        //return done('user:' + username + 'not in DB', false);
+      }
+          
+    });
+
+    res.send("Success!");
+    fs.unlink(req.file.path, function (err) {
+      if (err) console.error("Error: " + err);
+      console.log('successfully deleted : '+ req.file.path );
+    });
+  });
+};
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -80,6 +216,7 @@ if(app.get('env') === 'development') {
     });
   });
 }
+
 
 
 //Passed the ExpressJS server to Socket.io. 

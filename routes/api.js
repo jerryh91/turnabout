@@ -44,15 +44,11 @@ router.route('/login')
 
 router.route('/browse')
 .get(function(req, res) {
-
+	//Query from MongoDB
 	res.render('browse', {title: 'express'});
 });
 
-router.route('/profiles')
-.get(function(req, res) {
 
-	res.render('profile', {title: 'express'});
-});
 
 router.route('/blog')
 .get(function(req, res) {
@@ -111,7 +107,7 @@ router.route('/loadMessages/:requestingUser')
 	});
 });
 
-router.route('/profiles/:id')
+router.route('/getprofileinfo/:id')
 .get(function(req, res) {
 
 		var profileID = req.params.id;

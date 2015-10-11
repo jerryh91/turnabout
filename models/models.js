@@ -18,7 +18,15 @@ var userSchema = new mongoose.Schema({
     location: String,
     age: String,
     gender: String,
-    conversations: [{conversationID: String}]
+    conversations: [{conversationID: String}],
+    about: String,
+    additionalInfo: {
+        smoker: String, 
+        diet: String, 
+        religion: String, 
+        occupation: String,
+        personalityType: String},
+    photos: [{photoID: String}]
 });
 
 var conversationSchema = new mongoose.Schema({
