@@ -25,6 +25,7 @@ initPassport(passport);
 
 //Connect to MongoDB
 mongoose.connect('mongodb://localhost:27017/whysosingle');
+var Conversation = mongoose.model('Conversation');
 
 var app = express();
 
@@ -91,27 +92,82 @@ var io = require('socket.io').listen(app.listen(port, function()
 
 io.sockets.on('connection', function (socket) 
 {
-  console.log('socket connection');
-  //register custom event:"my_message"
+
+   console.log('socket connection');
+   
+   //Register custom event:"my_message"
 
     socket.emit('my_message', { message: 'welcome to the chat' });
-    socket.on('send', function (data) {
-    //Broadcast user sent data to all other sockets
-    io.sockets.emit('my_message', data);
 
-    //Capture new msg str: 
-    //Needs ID user who sent msg: session ID from Cookie?
-    if(socket.handshake.headers.cookie) 
+    //socket listens for "send" event
+    socket.on('send', function (data) 
     {
-        console.log("Cookie found");
-        var cookie = cookie.parse(socket.handshake.headers.cookie);
-        // var sessionID = parseSignedCookie(cookie['connect.sid'], 'secret');
-    }
 
-    //Check database for hash matching between stored and sent
+    //TODO:
+    //Limit broadcast only to person 
+    //listening/receiving this particular conversation
 
-    //Add to database with set to expire hash
+    //CHANGE:
+    //Broadcast user sent data to ALL other sockets listening
+    io.sockets.emit('my_message', data);
+  
+    //data.message, data.username (sender)
+    console.log("data.message: " + data.message);
+    console.log("data.username: " + data.username);
 
+    
+    // if(socket.handshake.headers.cookie) 
+    // {
+    //     console.log("Cookie found");
+    //     // var cookie = cookie.parse(socket.handshake.headers.cookie);
+    //     // var sessionID = parseSignedCookie(cookie['connect.sid'], 'secret');
+    
+    // }
+    
+
+    var Conversation = mongoose.model('Conversation');
+ 
+    // Conversation.find( function (err, conversations) {
+    //     if (err) return console.error(err);
+    //     console.log(conversations);
+    // })
+    //TODO:
+    //Need initiator and responder IDs or Strings
+
+    //Retrieve the Coversation (1 only) for this user with this receiver
+    // var query = Conversation.findOne({ 'initiator': '', 'responder' : ''});
+
+    // query.exec(function (err, conv) {
+    //     if (err) return handleError(err);
+    //     if (conv == null)
+    //     {
+
+    //       //Create new conversation 
+    //       var newConv = new Conversation();
+    //       //Need responder and initiator usernames
+    //       newConv.responder = "";
+    //       newConv.initiator = "";
+    //       console.log('Adding a new Conversation w/ new Message');
+    //       // newConv.save(function(err, newConv)
+    //       // {
+    //       //   if (err)
+    //       //   {
+    //       //     return (err, false);
+    //       //   }
+           
+    //       //   console.log('Successfully added new Conv: ');
+    //       //   return done(null, newUser);
+    //       // });
+         
+    //     }
+    //     else
+    //     {
+    //       //Add new message(s) to existing conversation
+    //       console.log('Adding new msg to exisiting Conversation');
+    //       //Conversation.add()
+    //     }
+
+    //   })
 
     });
 });

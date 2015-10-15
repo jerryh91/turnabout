@@ -116,7 +116,7 @@ module.exports = function (passport)
                         return (err, false);
                       }
                      
-                      console.log('Successfully signed up user: ' + username);
+                      console.log('Successfully added user: ' + username + 'db');
                       return done(null, newUser);
                     });
                 }

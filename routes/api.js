@@ -33,8 +33,7 @@ router.route('/about')
 router.route('/messages')
 .get(function(req, res) {
 
-	//Add msgs to Db
-	res.render('message_pg');
+	res.render('message_pg', {messageDisplay: 'Welcome to Chat!'});
 });
 
 router.route('/login')
@@ -74,6 +73,7 @@ router.route('/createProfile')
 	res.render('createProfile', {title: 'Sign Up!'});
 });
 
+//Called from main_controller.js
 router.route('/loadMessages/:requestingUser')
 .get(function(req, res) {
 	User.findOne({'username': req.params.requestingUser}, function(err, user){

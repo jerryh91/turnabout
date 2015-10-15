@@ -28,6 +28,10 @@ var conversationSchema = new mongoose.Schema({
     messages: [{author: String, message: String}]
 });
 
+// var messageSchema = new mongoose.Schema({
+    
+// });
+
 //Model declaration: "User", "Conversation"
 mongoose.model("User", userSchema);
 mongoose.model("Conversation", conversationSchema);

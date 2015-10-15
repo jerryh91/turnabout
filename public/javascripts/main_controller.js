@@ -198,7 +198,7 @@ mainApp.controller('MessagesController', function($scope, $http, userSessionServ
       method: "GET"
     })
     .success(function(response) {
-      console.log(response);
+      console.log("success loadMessages " + response);
     });
 
   socket.on('my_message', function(data){
@@ -215,7 +215,7 @@ mainApp.controller('MessagesController', function($scope, $http, userSessionServ
 
     // add the message to our model locally
     //$scope.messageDisplay += 'You: ' + $scope.messageContent + '\n';
-
+    console.log("hello inside sendMessage");
     // clear message box
     $scope.messageContent = '';
 
