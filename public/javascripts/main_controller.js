@@ -8,8 +8,15 @@ mainApp.config(['$routeProvider', function($routeProvider) {
         templateUrl: 'browse',
         controller: 'BrowseController'
       }).
-      when('/profiles/:username',{
-        templateUrl: 'profiles',
+      // when('/profile/:username',{
+      //   templateUrl: 'profile/' + username,
+      //   controller: 'ProfileController'
+      // }).      
+      when('/profile/:username',{
+        templateUrl: function(parameters){
+          console.log(parameters);
+          return '/profile/' + parameters.username;
+        },
         controller: 'ProfileController'
       }).
       when('/home',{
@@ -320,13 +327,29 @@ mainApp.controller('SearchController', function($scope, $routeParams, $location,
 
 mainApp.controller('ProfileController', function($scope, $routeParams, $http) { 
   $http({
-      url: '/profiles/' + $routeParams.username, 
+      url: '/getprofileinfo/' + $routeParams.username, 
       method: "GET"
     })
     .success(function(response) {
       $scope.userProfile = response;
     });
+  // $http({
+  //     url: '/profileimg/' + '561496dc3a9300ad150218f1', 
+  //     method: "GET"
+  //   })
+  //   .success(function(response) {
+  //     $scope.userImg = 'data:image/jpeg;base64,' + hexToBase64(response); //'data:image/jpeg;base64,' + 
+  //     //$scope.userImg2 = 'data:image/jpeg;base64,' + hexToBase64(response2);
+  //     $scope.userImg3 = 'data:image/jpeg;base64,' + btoa(response); //'data:image/jpeg;base64,' + 
+  //     $scope.userImg4 = 'data:image/jpeg;base64,' + btoa(response2);
+  //     //
+  //     //console.log($scope.userImg);
+  //   });
 });
+
+function hexToBase64(str) {
+    return btoa(String.fromCharCode.apply(null, str.replace(/\r|\n/g, "").replace(/([\da-fA-F]{2}) ?/g, "0x$1 ").replace(/ +$/, "").split(" ")));
+}
 
 mainApp.controller('HomeController', function($scope) {
     $scope.message = 'This is the Home screen.';

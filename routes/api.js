@@ -1,3 +1,4 @@
+
 var express = require('express');
 var router = express.Router();
 var filteredProfiles = [
@@ -33,7 +34,8 @@ router.route('/about')
 router.route('/messages')
 .get(function(req, res) {
 
-	res.render('message_pg', {messageDisplay: 'Welcome to Chat!'});
+	//Add msgs to Db
+	res.render('message_pg');
 });
 
 router.route('/login')
@@ -43,15 +45,11 @@ router.route('/login')
 
 router.route('/browse')
 .get(function(req, res) {
-
+	//Query from MongoDB
 	res.render('browse', {title: 'express'});
 });
 
-router.route('/profiles')
-.get(function(req, res) {
 
-	res.render('profile', {title: 'express'});
-});
 
 router.route('/blog')
 .get(function(req, res) {
@@ -73,7 +71,6 @@ router.route('/createProfile')
 	res.render('createProfile', {title: 'Sign Up!'});
 });
 
-//Called from main_controller.js
 router.route('/loadMessages/:requestingUser')
 .get(function(req, res) {
 	User.findOne({'username': req.params.requestingUser}, function(err, user){
@@ -111,7 +108,7 @@ router.route('/loadMessages/:requestingUser')
 	});
 });
 
-router.route('/profiles/:id')
+router.route('/getprofileinfo/:id')
 .get(function(req, res) {
 
 		var profileID = req.params.id;
