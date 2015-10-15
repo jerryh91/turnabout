@@ -18,8 +18,10 @@ var authenticate = require('./routes/authenticate')(passport); //router
 var session = require('express-session');
 var initPassport = require('./passport-init'); //needs models.js to be loaded first
 var debug = require('debug')('app');
-
-
+var multer = require('multer');
+var upload = multer({ dest: 'uploads/'});
+var User = mongoose.model('User');
+ 
 // Initialize Passport
 initPassport(passport);
 
@@ -230,18 +232,37 @@ io.sockets.on('connection', function (socket)
     
     // }
     
+  var conversationDoc = new Conversation({conversationID: 'testID',
+    initiator: 'initiatorID2',
+    responder: 'responderID2',
+    });
 
-    var Conversation = mongoose.model('Conversation');
- 
-    // Conversation.find( function (err, conversations) {
-    //     if (err) return console.error(err);
-    //     console.log(conversations);
-    // })
+   //console.log(conversationDoc.initiator);
+
+   //saving conversationDoc (document) to DB
+   conversationDoc.save(function (err, conversationDoc) 
+   {
+      console.log("conversationDoc save");
+      if (err) 
+      {
+        console.log("DB Save err");
+        return console.error(err);
+
+      }
+    })
+
+    Conversation.find( function (err, conversations) {
+        if (err) return console.error(err);
+        console.log(conversations);
+    })
+
+     Conversation.findOne({ 'initiator': 'initiatorID2'});
+
     //TODO:
     //Need initiator and responder IDs or Strings
 
     //Retrieve the Coversation (1 only) for this user with this receiver
-    // var query = Conversation.findOne({ 'initiator': '', 'responder' : ''});
+    var query = Conversation.findOne({ 'initiator': '', 'responder' : ''});
 
     // query.exec(function (err, conv) {
     //     if (err) return handleError(err);
