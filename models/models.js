@@ -30,21 +30,24 @@ var userSchema = new mongoose.Schema({
 });
 
 var conversationSchema = new mongoose.Schema({
-    conversationID: String,
-    initiator: String,
-    responder: String,
+    initiatorUsername: String,
+    responderUsername: String,
     messages: [{author: String, message: String}]
 });
 
-// var messageSchema = new mongoose.Schema({
-    
-// });
+var messageSchema = new mongoose.Schema({
+    senderUsername: String, 
+    receiverUsername:String, 
+    content: String
+});
 
 //Model declaration: "User", "Conversation"
 mongoose.model("User", userSchema);
 mongoose.model("Conversation", conversationSchema);
+mongoose.model("Message", messageSchema);
 
 module.exports = {
 	userSchema: userSchema,
-    conversationSchema: conversationSchema
+    conversationSchema: conversationSchema,
+    messageSchema: messageSchema
 };

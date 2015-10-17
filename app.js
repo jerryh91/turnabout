@@ -34,6 +34,7 @@ Grid.mongo = mongoose.mongo;
 var gfs;
 
 var Conversation = mongoose.model('Conversation');
+var Message = mongoose.model('Message');
 
 conn.once('open', function() {
   console.log('mongoose connection open');
@@ -211,6 +212,15 @@ io.sockets.on('connection', function (socket)
     socket.on('send', function (data) 
     {
 
+
+    // if(socket.handshake.headers.cookie) 
+    // {
+    //     console.log("Cookie found");
+    //     // var cookie = cookie.parse(socket.handshake.headers.cookie);
+    //     // var sessionID = parseSignedCookie(cookie['connect.sid'], 'secret');
+    
+    // }
+    
     //TODO:
     //Limit broadcast only to person 
     //listening/receiving this particular conversation
@@ -223,53 +233,106 @@ io.sockets.on('connection', function (socket)
     console.log("data.message: " + data.message);
     console.log("data.username: " + data.username);
 
-    
-    // if(socket.handshake.headers.cookie) 
-    // {
-    //     console.log("Cookie found");
-    //     // var cookie = cookie.parse(socket.handshake.headers.cookie);
-    //     // var sessionID = parseSignedCookie(cookie['connect.sid'], 'secret');
-    
-    // }
-    
-  var conversationDoc = new Conversation({conversationID: 'testID',
-    initiator: 'initiatorID2',
-    responder: 'responderID2',
+    //Create message document
+    //add doc to Conversation doc's msg list
+    // TODO: 
+    // Retrieve receiver ID
+    var messageDoc = new Message({
+      senderUsername: data.username,
+      receiverUsername: 'anyReceiverUsername',
+      content: data.message
     });
 
-   //console.log(conversationDoc.initiator);
+//C:\Projects\whysosingle\app_js.txt
+    
+//Find Gender of Sender Profile
+var msgSenderUsername =  messageDoc.senderUsername;
+var msgReceiverUsername =  messageDoc.receiverUsername;
+var msgSenderGender;
+var convQuery;
+var senderQuery = User.findOne({ username: msgSenderUsername});
+senderQuery.exec(function (err, user) {
+    msgSenderGender = user.gender;
+    console.log("msgSenderGender: " + msgSenderGender);
+});
 
-   //saving conversationDoc (document) to DB
-   conversationDoc.save(function (err, conversationDoc) 
+if (msgSenderGender == "male")
+{
+  //Message:
+  //MUST be part of an existing Conversation
+  convQuery = Conversation.findOne({ initiatorUsername:msgReceiverUsername,
+                       receiverUsername: msgSenderUsername});
+} else
+{
+  //Message:
+  //part of Existing Conversation
+  //or
+  //initial messag in new Conversation 
+
+  //Check existing Conversation
+  convQuery = Conversation.findOne({ initiatorUsername:msgSenderUsername,
+                                     receiverUsername: msgReceiverUsername});
+
+   convQuery.exec(function (err, conv) 
    {
-      console.log("conversationDoc save");
-      if (err) 
+      if (conv.length <= 0)
       {
-        console.log("DB Save err");
-        return console.error(err);
+        //Create new Conversation
+         var conversationDoc = new Conversation ({
+          initiatorUsername: msgSenderUsername,
+          responderUsername: msgReceiverUsername,
+          messages
+        });
 
       }
-    })
+      else
+      {
 
-    Conversation.find( function (err, conversations) {
-        if (err) return console.error(err);
-        console.log(conversations);
-    })
+      }
+    }
+});
+}
 
-     Conversation.findOne({ 'initiator': 'initiatorID2'});
 
-    //TODO:
-    //Need initiator and responder IDs or Strings
+
+//Find ALL Users
+// var allUserQuery = User.find();
+
+// allUserQuery.exec(function (err, allusers) {
+//   console.log(allusers);
+// });
+
+// Conversation.find({ 'initiator': 'initiatorID2'}, function (err, conversations) {
+//         if (err) return console.error(err);
+//         console.log('Printing list of ALL conversations');
+//         if (conversations.length <= 0)
+//         {
+//           console.log('No convos');
+//         }
+//         else
+//         {
+
+//         console.log(conversations);
+//         }
+//     })
+
+
+// var ConversationQuery = Conversation.find({ 'initiator': 'initiatorID2'});
+// console.log('Printing list of conversation w/ initiator: initiatorID2');
+// console.log(ConversationQuery);
 
     //Retrieve the Coversation (1 only) for this user with this receiver
-    var query = Conversation.findOne({ 'initiator': '', 'responder' : ''});
+    // var query = Conversation.find({ 'initiator': '', 'responder' : ''});
 
     // query.exec(function (err, conv) {
     //     if (err) return handleError(err);
     //     if (conv == null)
     //     {
 
-    //       //Create new conversation 
+            //Initial message
+            //Create new conversation 
+            //Set Initiator for conversation
+
     //       var newConv = new Conversation();
     //       //Need responder and initiator usernames
     //       newConv.responder = "";
