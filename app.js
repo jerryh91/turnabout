@@ -286,8 +286,9 @@ if (msgSenderGender == "male")
 
       }
       else
-      {
-
+      { 
+        //add message to existing Conversation
+        conv.messages.add()
       }
     }
 });
