@@ -258,7 +258,7 @@ io.sockets.on('connection', function (socket)
     msgSenderGender = user.gender;
     console.log("msgSenderGender (found in db): " + msgSenderGender);
 
-
+    //PASS:10/22
     if (msgSenderGender == "male")
     {
       console.log('msgSenderGender: male');
@@ -267,13 +267,13 @@ io.sockets.on('connection', function (socket)
 
       //Message:
       //MUST be part of an existing Conversation
-      // convQuery = Conversation.findOne({'initiatorUsername': msgReceiverUsername, 'receiverUsername': msgSenderUsername});
+      // convQuery = Conversation.findOne({'initiatorUsername': msgReceiverUsername, 'responderUsername': msgSenderUsername});
       // convQuery.exec(function (err, convs) {
       // if (err) return handleError(err);
       // console.log(convs) // Space Ghost is a talk show host.
       // });
 
-      convQuery = {initiatorUsername: msgReceiverUsername, receiverUsername: msgSenderUsername};
+      convQuery = {initiatorUsername: msgReceiverUsername, responderUsername: msgSenderUsername};
 
       Conversation.update(convQuery, {$push: {messages: msgID}}, function (err, raw)
       {
@@ -288,6 +288,7 @@ io.sockets.on('connection', function (socket)
     } else
     {
       console.log('msgSenderGender: ' + msgSenderGender);
+      console.log('msgReceiverUsername: ' + msgReceiverUsername);
       //Message:
       //part of Existing Conversation
       //or
@@ -295,14 +296,18 @@ io.sockets.on('connection', function (socket)
 
       //Check existing Conversation
       convQuery = { initiatorUsername:msgSenderUsername,
-                                         receiverUsername: msgReceiverUsername} ;
+                                         responderUsername: msgReceiverUsername} ;
 
        Conversation.findOne(convQuery, function (err, conv) {
+       
+          //TODO:
+          //conv == null after sending subsequent msgs
+
           //No Conversation
-          //conv == null
+          //PASS: 10/23
           if (!conv)
           {
-            console.log('Existing conversationDoc: ', conv);
+            console.log('no conversationDoc: ');
             //Create new Conversation
              var conversationDoc = new Conversation ({
               initiatorUsername: msgSenderUsername,
@@ -312,22 +317,32 @@ io.sockets.on('connection', function (socket)
               messages: [msgID]
             });
 
-              conversationDoc.save(function(err, newConv)
+            conversationDoc.save(function(err, newConv)
+            {
+              if (err)
               {
-                if (err)
-                {
-                  return (err, false);
-                }
-              
-                console.log('Successfully added new Conv: ', newConv);
-                // return done(null, newConv);
-              });
+                return (err, false);
+              }
+            
+              console.log('Successfully added new Conv: ', newConv);
+              // return done(null, newConv);
+            });
 
           }
           else
           { 
             //add message to existing Conversation
             // conv.messages.add()
+            conv.messages.push(msgID);
+            conv.save(function(err, updateConv) 
+            {
+              if (err)
+              {
+                return (err, false);
+              }
+
+              console.log('successfully added ', msgID, 'to existing conv');
+            });
           }
         });
 
@@ -335,72 +350,6 @@ io.sockets.on('connection', function (socket)
 
 });
 
-
-
-
-//Find ALL Users
-// var allUserQuery = User.find();
-
-// allUserQuery.exec(function (err, allusers) {
-//   console.log(allusers);
-// });
-
-// Conversation.find({ 'initiator': 'initiatorID2'}, function (err, conversations) {
-//         if (err) return console.error(err);
-//         console.log('Printing list of ALL conversations');
-//         if (conversations.length <= 0)
-//         {
-//           console.log('No convos');
-//         }
-//         else
-//         {
-
-//         console.log(conversations);
-//         }
-//     })
-
-
-// var ConversationQuery = Conversation.find({ 'initiator': 'initiatorID2'});
-// console.log('Printing list of conversation w/ initiator: initiatorID2');
-// console.log(ConversationQuery);
-
-    //Retrieve the Coversation (1 only) for this user with this receiver
-    // var query = Conversation.find({ 'initiator': '', 'responder' : ''});
-
-    // query.exec(function (err, conv) {
-    //     if (err) return handleError(err);
-    //     if (conv == null)
-    //     {
-
-            //Initial message
-            //Create new conversation 
-            //Set Initiator for conversation
-
-    //       var newConv = new Conversation();
-    //       //Need responder and initiator usernames
-    //       newConv.responder = "";
-    //       newConv.initiator = "";
-    //       console.log('Adding a new Conversation w/ new Message');
-    //       // newConv.save(function(err, newConv)
-    //       // {
-    //       //   if (err)
-    //       //   {
-    //       //     return (err, false);
-    //       //   }
-           
-    //       //   console.log('Successfully added new Conv: ');
-    //       //   return done(null, newConv);
-    //       // });
-         
-    //     }
-    //     else
-    //     {
-    //       //Add new message(s) to existing conversation
-    //       console.log('Adding new msg to exisiting Conversation');
-    //       //Conversation.add()
-    //     }
-
-    //   })
 
     });
 });
