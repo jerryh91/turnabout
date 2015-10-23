@@ -234,12 +234,12 @@ mainApp.controller('MessagesController', function($scope, $http, userSessionServ
 
 mainApp.controller('CreateProfileController', function($scope, $location, $http) {
   $scope.profile = {
-    email: "marcus.a.bennett@gmail.com",
-    password: "asdf",
-    username: "goals23",
+    email: "abc@gmail.com",
+    password: "ab",
+    username: "abc",
     location: "Austin",
     age: 24,
-    gender: "male"
+    gender: "female"
   };
   $scope.fileLocation = $location;
   $scope.reset = function() {

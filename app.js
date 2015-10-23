@@ -294,13 +294,15 @@ io.sockets.on('connection', function (socket)
       //initial messag in new Conversation 
 
       //Check existing Conversation
-      convQuery = Conversation.findOne({ initiatorUsername:msgSenderUsername,
-                                         receiverUsername: msgReceiverUsername});
+      convQuery = { initiatorUsername:msgSenderUsername,
+                                         receiverUsername: msgReceiverUsername} ;
 
-       convQuery.exec(function (err, conv) {
+       Conversation.findOne(convQuery, function (err, conv) {
           //No Conversation
-          if (conv.length <= 0)
+          //conv == null
+          if (!conv)
           {
+            console.log('Existing conversationDoc: ', conv);
             //Create new Conversation
              var conversationDoc = new Conversation ({
               initiatorUsername: msgSenderUsername,
@@ -309,6 +311,17 @@ io.sockets.on('connection', function (socket)
               //Add new message to Conversation
               messages: [msgID]
             });
+
+              conversationDoc.save(function(err, newConv)
+              {
+                if (err)
+                {
+                  return (err, false);
+                }
+              
+                console.log('Successfully added new Conv: ', newConv);
+                // return done(null, newConv);
+              });
 
           }
           else
