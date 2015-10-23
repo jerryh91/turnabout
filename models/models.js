@@ -32,7 +32,7 @@ var userSchema = new mongoose.Schema({
 var conversationSchema = new mongoose.Schema({
     initiatorUsername: String,
     responderUsername: String,
-    messages: [{author: String, message: String}]
+    messages: [{ type: String, ref: 'Message' }]
 });
 
 var messageSchema = new mongoose.Schema({

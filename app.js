@@ -239,60 +239,89 @@ io.sockets.on('connection', function (socket)
     // Retrieve receiver ID
     var messageDoc = new Message({
       senderUsername: data.username,
-      receiverUsername: 'anyReceiverUsername',
+      receiverUsername: 'test1',
       content: data.message
     });
 
-//C:\Projects\whysosingle\app_js.txt
+    //C:\Projects\whysosingle\app_js.txt
+        
+    //Find Gender of Sender Profile
+    var msgSenderUsername =  messageDoc.senderUsername;
+    var msgReceiverUsername =  messageDoc.receiverUsername;
+    var msgID = messageDoc._id;
+
+    var msgSenderGender;
+    var convQuery;
+    var senderQuery = User.findOne({ username: msgSenderUsername});
     
-//Find Gender of Sender Profile
-var msgSenderUsername =  messageDoc.senderUsername;
-var msgReceiverUsername =  messageDoc.receiverUsername;
-var msgSenderGender;
-var convQuery;
-var senderQuery = User.findOne({ username: msgSenderUsername});
-senderQuery.exec(function (err, user) {
+    senderQuery.exec(function (err, user) {
     msgSenderGender = user.gender;
-    console.log("msgSenderGender: " + msgSenderGender);
-});
+    console.log("msgSenderGender (found in db): " + msgSenderGender);
 
-if (msgSenderGender == "male")
-{
-  //Message:
-  //MUST be part of an existing Conversation
-  convQuery = Conversation.findOne({ initiatorUsername:msgReceiverUsername,
-                       receiverUsername: msgSenderUsername});
-} else
-{
-  //Message:
-  //part of Existing Conversation
-  //or
-  //initial messag in new Conversation 
 
-  //Check existing Conversation
-  convQuery = Conversation.findOne({ initiatorUsername:msgSenderUsername,
-                                     receiverUsername: msgReceiverUsername});
+    if (msgSenderGender == "male")
+    {
+      console.log('msgSenderGender: male');
+      //DEBUG:
+      //Create a Conversation, if no conversation
 
-   convQuery.exec(function (err, conv) 
-   {
-      if (conv.length <= 0)
+      //Message:
+      //MUST be part of an existing Conversation
+      // convQuery = Conversation.findOne({'initiatorUsername': msgReceiverUsername, 'receiverUsername': msgSenderUsername});
+      // convQuery.exec(function (err, convs) {
+      // if (err) return handleError(err);
+      // console.log(convs) // Space Ghost is a talk show host.
+      // });
+
+      convQuery = {initiatorUsername: msgReceiverUsername, receiverUsername: msgSenderUsername};
+
+      Conversation.update(convQuery, {$push: {messages: msgID}}, function (err, raw)
       {
-        //Create new Conversation
-         var conversationDoc = new Conversation ({
-          initiatorUsername: msgSenderUsername,
-          responderUsername: msgReceiverUsername,
-          messages
+        if (err)
+        {
+          console.log(err);
+        }
+        console.log("Mongo raw response: ", raw);
+        console.log("Added MsgID: ", msgID);
+      });
+
+    } else
+    {
+      console.log('msgSenderGender: ' + msgSenderGender);
+      //Message:
+      //part of Existing Conversation
+      //or
+      //initial messag in new Conversation 
+
+      //Check existing Conversation
+      convQuery = Conversation.findOne({ initiatorUsername:msgSenderUsername,
+                                         receiverUsername: msgReceiverUsername});
+
+       convQuery.exec(function (err, conv) {
+          //No Conversation
+          if (conv.length <= 0)
+          {
+            //Create new Conversation
+             var conversationDoc = new Conversation ({
+              initiatorUsername: msgSenderUsername,
+              responderUsername: msgReceiverUsername,
+              //TODO: 
+              //Add new message to Conversation
+              messages: [msgID]
+            });
+
+          }
+          else
+          { 
+            //add message to existing Conversation
+            // conv.messages.add()
+          }
         });
 
-      }
-      else
-      { 
-        //add message to existing Conversation
-        conv.messages.add()
-      }
     }
+
 });
-}
+
 
 
 
@@ -347,7 +376,7 @@ if (msgSenderGender == "male")
     //       //   }
            
     //       //   console.log('Successfully added new Conv: ');
-    //       //   return done(null, newUser);
+    //       //   return done(null, newConv);
     //       // });
          
     //     }
