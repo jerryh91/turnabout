@@ -16,13 +16,13 @@ module.exports = function (passport)
     //TODO: Investigate deeper into purpose of de/serialize
     passport.serializeUser(function(user, done) 
     {
-        console.log('serializing user:',user._id);
+        //console.log('serializing user:',user._id);
         return done(null, user._id);
     });
 
     passport.deserializeUser(function(id, done) 
     {
-        console.log('deserializeUser');
+        //console.log('deserializeUser');
         //Find user with _id
         User.findById (id, function (err, user)
         {
@@ -38,7 +38,7 @@ module.exports = function (passport)
             return done('user not found', false);
           }
           //return user obj to passport
-          console.log('user found!');
+          //console.log('user found!');
           return done(null, user);
         })
     
@@ -68,7 +68,7 @@ module.exports = function (passport)
                 return done('user:  '+ username + 'incorrect password', false);
               }
               //Successful login
-              console.log('Successfully signed in');
+              console.log('Successfully signed in ' + user.username);
               return done(null, user);
             });
       }

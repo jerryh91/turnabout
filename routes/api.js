@@ -26,10 +26,56 @@ conn.once('open', function() {
 });
 
 router.post('/upload/photo', upload.single('profilePic'), function(req, res, next){
-    // console.log(req);
-    //multer handles multipart/form-data so we just need to grab req.file
-    uploadImg(req, res);
-    // res.render('index', {title: 'Turnabout'});
+  //multer handles multipart/form-data so we just need to grab req.file
+  var writestream = gfs.createWriteStream({
+    filename: req.file.name,
+    mode:'w',
+    content_type: req.file.mimetype,
+    metadata: req.body,
+  });
+  fs.createReadStream(req.file.path).pipe(writestream);
+  var username = req.user.username;
+  writestream.on('close', function (file) {
+    User.findOne({'username': username}, function(err, user)
+    {
+      if (err)
+      {
+        console.log(err);
+        //return done(err, false);
+      }
+      
+      if (user)
+      {
+        console.log('User found to add photo ID');
+        // use + '' to get the string output from ObjectId(...)
+        console.log(file._id + '');
+        User.update(
+          { "username" : username}, 
+          //{$push: {"photos" : {photoID: file._id + ''}}}, 
+          {"photos" : [{photoID: file._id + ''}]}, 
+          function(err, results) {
+            if (err)
+            {
+              console.log(err);
+              return (err, false);
+            }
+            console.log('Successfully added photoID to user. Results are: ' + results);
+            //return done(null, user);
+          });
+      } else
+      {
+        console.log('user does not exist');
+        //return done('user:' + username + 'not in DB', false);
+      }
+          
+    });
+
+    res.send("Success!");
+    fs.unlink(req.file.path, function (err) {
+      if (err) console.error("Error: " + err);
+      console.log('successfully deleted : '+ req.file.path );
+    });
+  });
 }); 
 
 router.post('/profile/update', function(req, res, next){
@@ -119,174 +165,123 @@ function getProfilePicture(user, callback){
   //res.write(data, 'binary');
 }
 
-var uploadImg = function(req,res) {
-  var writestream = gfs.createWriteStream({
-    filename: req.file.name,
-    mode:'w',
-    content_type: req.file.mimetype,
-    metadata: req.body,
-  });
-  fs.createReadStream(req.file.path).pipe(writestream);
-  var username = req.user.username;
-  writestream.on('close', function (file) {
-    User.findOne({'username': username}, function(err, user)
-    {
-      if (err)
-      {
-        console.log(err);
-        //return done(err, false);
-      }
-      
-      if (user)
-      {
-        console.log('User found to add photo ID');
-        // use + '' to get the string output from ObjectId(...)
-        console.log(file._id + '');
-        User.update(
-          { "username" : username}, 
-          //{$push: {"photos" : {photoID: file._id + ''}}}, 
-          {"photos" : [{photoID: file._id + ''}]}, 
-          function(err, results) {
-            if (err)
-            {
-              console.log(err);
-              return (err, false);
-            }
-            console.log('Successfully added photoID to user. Results are: ' + results);
-            //return done(null, user);
-          });
-      } else
-      {
-        console.log('user does not exist');
-        //return done('user:' + username + 'not in DB', false);
-      }
-          
-    });
-
-    res.send("Success!");
-    fs.unlink(req.file.path, function (err) {
-      if (err) console.error("Error: " + err);
-      console.log('successfully deleted : '+ req.file.path );
-    });
-  });
-};
-
 router.route('/')
 .get(function(req, res) {
-	//Query from MongoDB
-	res.render('index', {title: 'Turnabout'});
+    //Query from MongoDB
+    res.render('index', {title: 'Turnabout'});
 });
 
 router.route('/home')
 .get(function(req, res) {
-	//Query from MongoDB
-	res.render('home', {message: 'My message'});
+    //Query from MongoDB
+    res.render('home', {message: 'My message'});
 });
 
 router.route('/about')
 .get(function(req, res) {
-	//Query from MongoDB
-	res.render('about', {message: 'My message'});
+    //Query from MongoDB
+    res.render('about', {message: 'My message'});
 });
 
 //Messages List View
 router.route('/messages')
 .get(function(req, res) {
 
-	//Add msgs to Db
-	res.render('message_pg');
+    //Add msgs to Db
+    res.render('message_pg');
 });
 
 router.route('/login')
 .get(function(req, res){
-	res.render('login');
+    res.render('login');
 });
 
 router.route('/browse')
 .get(function(req, res) {
-	//Query from MongoDB
-	res.render('browse', {title: 'express'});
+    //Query from MongoDB
+    res.render('browse', {title: 'express'});
 });
 
 router.route('/blog')
 .get(function(req, res) {
-	res.render('blog', {title: 'express'});
+    res.render('blog', {title: 'express'});
 });
 
 router.route('/search')
 .get(function(req, res) {
-	if (req.query.location) {
-		// PUT SEARCH LOGIC HERE
-    	res.json(filteredProfiles);
-  	} else {
-		res.render('search', {title: 'express'});
-  	}
+    if (req.query.location) {
+        // PUT SEARCH LOGIC HERE
+        res.json(filteredProfiles);
+    } else {
+        res.render('search', {title: 'express'});
+    }
 });
 
 router.route('/createProfile')
 .get(function(req, res) {
-	res.render('createProfile', {title: 'Sign Up!'});
+    res.render('createProfile', {title: 'Sign Up!'});
 });
 
 router.route('/loadMessages/:requestingUser')
 .get(function(req, res) {
-	User.findOne({'username': req.params.requestingUser}, function(err, user){
-		if(err){
-			console.log(err);
-			return;
-		}
-		if(user){
-			console.log("User found: " + req.params.requestingUser);
-			if(user.conversations){
-				var foundConversations = [];
-				for(var i = 0; i < user.conversations.length; i++){
-					console.log("user.conversations[i]: " + user.conversations[i]);
-					Conversation.findOne({'conversationID': user.conversations[i].conversationID}, function(err, conversation){
-						if(err){
-							console.log("error here");
-						}
-						if(conversation){
-							console.log("conversation found")
-							console.log(conversation);
-							foundConversations.push(conversation);
-						} else {
-							console.log("conversation not found");
-						}
-						if(foundConversations.length == user.conversations.length){
-							res.json(foundConversations);
-						}
-					});
-				}
-			}
-		} else{
-			console.log("User does not exist");
-			return;
-		}
-	});
+    console.log("entered load messages route with req: ", req.params.requestingUser);
+    User.findOne({'username': req.params.requestingUser}, function(err, user){
+        if(err){
+            console.log(err);
+            return;
+        }
+        if(user){
+            //console.log("User found: " + req.params.requestingUser);
+            if(user.conversations){
+                var foundConversations = [];
+                for(var i = 0; i < user.conversations.length; i++){
+                    console.log("user.conversations[i]: " + user.conversations[i]);
+                    Conversation.findOne({'conversationID': user.conversations[i].conversationID}, function(err, conversation){
+                        if(err){
+                            console.log("error here");
+                        }
+                        if(conversation){
+                            console.log("conversation found")
+                            console.log(conversation);
+                            foundConversations.push(conversation);
+                        } else {
+                            console.log("conversation not found");
+                        }
+                        if(foundConversations.length == user.conversations.length){
+                            res.json(foundConversations);
+                        }
+                    });
+                }
+            }
+        } else{
+            console.log("User does not exist");
+            return;
+        }
+    });
 });
 
 router.route('/getprofileinfo/:id')
 .get(function(req, res) {
 
-		var profileID = req.params.id;
+        var profileID = req.params.id;
 
-		User.findOne({'username': profileID}, function(err, user){
-			if(err){
-				console.log(err);
-				return;
-			}
-			if(user){
-				console.log("User found: " + profileID);
-				//TO DO: don't return all user data
-				res.json(user);
-			} else{
-				console.log("User does not exist");
-				return;
-			}
-		});
+        User.findOne({'username': profileID}, function(err, user){
+            if(err){
+                console.log(err);
+                return;
+            }
+            if(user){
+                // console.log("User found: " + profileID);
+                //TO DO: don't return all user data
+                res.json(user);
+            } else{
+                console.log("User does not exist");
+                return;
+            }
+        });
 
-		//Query profileID from MongoDB
-		// res.json(filteredProfiles[0]);
+        //Query profileID from MongoDB
+        // res.json(filteredProfiles[0]);
 });
 
 
@@ -294,17 +289,17 @@ router.route('/getprofileinfo/:id')
 //.put: update existing profile with id
 // .put(function(req, res) {
 
-// 		var profileID = req.params.id;
-// 		//Query profileID from MongoDB
-// 		res.send({message: 'Update profile: ' + profileID});
+//      var profileID = req.params.id;
+//      //Query profileID from MongoDB
+//      res.send({message: 'Update profile: ' + profileID});
 
 // })
 
 // .delete(function(req, res) {
 
-// 		var profileID = req.params.id;
-// 		//delete profileID from MongoDB
-// 		res.send({message: 'Delete profile: ' + profileID});
+//      var profileID = req.params.id;
+//      //delete profileID from MongoDB
+//      res.send({message: 'Delete profile: ' + profileID});
 
 //});
 

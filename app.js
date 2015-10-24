@@ -16,14 +16,13 @@ var authenticate = require('./routes/authenticate')(passport); //router
 var session = require('express-session');
 var initPassport = require('./passport-init'); //needs models.js to be loaded first
 var debug = require('debug')('app');
-var User = mongoose.model('User');
 
 // Initialize Passport
 initPassport(passport);
 
 //Connect to MongoDB
 mongoose.connect('mongodb://localhost:27017/whysosingle');
-
+var User = mongoose.model('User');
 var Conversation = mongoose.model('Conversation');
 var Message = mongoose.model('Message');
 
@@ -90,15 +89,15 @@ var io = require('socket.io').listen(app.listen(port, function()
 io.sockets.on('connection', function (socket) 
 {
 
-   console.log('socket connection');
+  console.log('socket connection');
    
-   //Register custom event:"my_message"
+  //Register custom event:"my_message"
 
-    socket.emit('my_message', { message: 'welcome to the chat' });
+  socket.emit('my_message', { message: 'welcome to the chat' });
 
-    //socket listens for "send" event
-    socket.on('send', function (data) 
-    {
+  //socket listens for "send" event
+  socket.on('send', function (data) 
+  {
 
 
     // if(socket.handshake.headers.cookie) 
@@ -116,7 +115,7 @@ io.sockets.on('connection', function (socket)
     //CHANGE:
     //Broadcast user sent data to ALL other sockets listening
     io.sockets.emit('my_message', data);
-  
+
     //data.message, data.username (sender)
     console.log("data.message: " + data.message);
     console.log("data.username: " + data.username);
@@ -143,50 +142,50 @@ io.sockets.on('connection', function (socket)
     var senderQuery = User.findOne({ username: msgSenderUsername});
     
     senderQuery.exec(function (err, user) {
-    msgSenderGender = user.gender;
-    console.log("msgSenderGender (found in db): " + msgSenderGender);
+      msgSenderGender = user.gender;
+      console.log("msgSenderGender (found in db): " + msgSenderGender);
 
-    //PASS:10/22
-    if (msgSenderGender == "male")
-    {
-      console.log('msgSenderGender: male');
-      //DEBUG:
-      //Create a Conversation, if no conversation
-
-      //Message:
-      //MUST be part of an existing Conversation
-      // convQuery = Conversation.findOne({'initiatorUsername': msgReceiverUsername, 'responderUsername': msgSenderUsername});
-      // convQuery.exec(function (err, convs) {
-      // if (err) return handleError(err);
-      // console.log(convs) // Space Ghost is a talk show host.
-      // });
-
-      convQuery = {initiatorUsername: msgReceiverUsername, responderUsername: msgSenderUsername};
-
-      Conversation.update(convQuery, {$push: {messages: msgID}}, function (err, raw)
+      //PASS:10/22
+      if (msgSenderGender == "male")
       {
-        if (err)
+        console.log('msgSenderGender: male');
+        //DEBUG:
+        //Create a Conversation, if no conversation
+
+        //Message:
+        //MUST be part of an existing Conversation
+        // convQuery = Conversation.findOne({'initiatorUsername': msgReceiverUsername, 'responderUsername': msgSenderUsername});
+        // convQuery.exec(function (err, convs) {
+        // if (err) return handleError(err);
+        // console.log(convs) // Space Ghost is a talk show host.
+        // });
+
+        convQuery = {initiatorUsername: msgReceiverUsername, responderUsername: msgSenderUsername};
+
+        Conversation.update(convQuery, {$push: {messages: msgID}}, function (err, raw)
         {
-          console.log(err);
-        }
-        console.log("Mongo raw response: ", raw);
-        console.log("Added MsgID: ", msgID);
-      });
+          if (err)
+          {
+            console.log(err);
+          }
+          console.log("Mongo raw response: ", raw);
+          console.log("Added MsgID: ", msgID);
+        });
 
-    } else
-    {
-      console.log('msgSenderGender: ' + msgSenderGender);
-      console.log('msgReceiverUsername: ' + msgReceiverUsername);
-      //Message:
-      //part of Existing Conversation
-      //or
-      //initial messag in new Conversation 
+      } else
+      {
+        console.log('msgSenderGender: ' + msgSenderGender);
+        console.log('msgReceiverUsername: ' + msgReceiverUsername);
+        //Message:
+        //part of Existing Conversation
+        //or
+        //initial messag in new Conversation 
 
-      //Check existing Conversation
-      convQuery = { initiatorUsername:msgSenderUsername,
-                                         responderUsername: msgReceiverUsername} ;
+        //Check existing Conversation
+        convQuery = { initiatorUsername:msgSenderUsername,
+                                           responderUsername: msgReceiverUsername} ;
 
-       Conversation.findOne(convQuery, function (err, conv) {
+        Conversation.findOne(convQuery, function (err, conv) {
        
           //TODO:
           //conv == null after sending subsequent msgs
@@ -233,13 +232,9 @@ io.sockets.on('connection', function (socket)
             });
           }
         });
-
-    }
-
-});
-
-
+      }
     });
+  });
 });
 module.exports = app;
 

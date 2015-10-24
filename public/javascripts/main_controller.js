@@ -236,8 +236,10 @@ mainApp.controller('BrowseController', function($scope, $routeParams, $location,
 });
 
 mainApp.controller('MessagesController', function($scope, $http, userSessionService, socket, focus){
+  console.log("MessagesController running");
   $scope.messageDisplay = '';
   $scope.username = userSessionService.getUserSession().username;
+  
   $http({
       url: '/loadMessages/' + $scope.username, 
       method: "GET"
@@ -245,6 +247,8 @@ mainApp.controller('MessagesController', function($scope, $http, userSessionServ
     .success(function(response) {
       console.log("success loadMessages " + response);
     });
+
+  socket.on('init')
 
   socket.on('my_message', function(data){
     if(data.message) 
