@@ -20,12 +20,16 @@ var userSchema = new mongoose.Schema({
     gender: String,
     conversations: [{conversationID: String}],
     about: String,
+    lastOnline: String,
     additionalInfo: {
-        smoker: String, 
+        smoker: String,
+        drinks: String,
+        drugs: String, 
         diet: String, 
         religion: String, 
         occupation: String,
-        personalityType: String},
+        personalityType: String,
+        school: String}, 
     photos: [{photoID: String}]
 });
 

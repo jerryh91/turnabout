@@ -1,18 +1,116 @@
 <div class="container">
   <div id="theList" class="list-group">
     <li class="thumbnail col-sm-12">
-<!--       <img class="col-sm-4" ng-src="{{ userImg }}"-->
       <img class="col-sm-4" src='<%= imageLink %>'>
       <div class="caption col-sm-8">
-        <h2>{{ userProfile.username }}</h2>
-        <h4>{{ userProfile.points }}Ƥ</h4>
-        <p>{{userProfile.detail}}</p>
-        <p><a href="#" class="btn btn-primary" role="button">Like</a></p>
+        <h2>
+          <% if(editable){ %>
+            <a href='<%= goNowherePath %>' editable-text="userProfile.username">{{ userProfile.username }}</a>
+          <% } else { %>
+            {{ userProfile.username }}
+          <% } %>
+        </h2>
+        <h5>
+          <ul class="nav nav-pills">
+            <li role="presentation" class="active">
+              <% if(editable){ %>
+                <a href='<%= goNowherePath %>' editable-radiolist="userProfile.gender" e-ng-options="s.value as s.text for s in genders">{{ showStatus(genders, userProfile.gender) }}</a>
+              <% } else { %>
+                {{userProfile.gender}}
+              <% } %>
+            </li>
+            <li role="presentation" class="active">
+              <% if(editable){ %>
+                <a href='<%= goNowherePath %>' editable-text="userProfile.age">{{ userProfile.age }}</a>
+              <% } else { %>
+                {{ userProfile.age }}
+              <% } %>
+            </li>
+            <li role="presentation" class="active">
+              <% if(editable){ %>
+                <a href='<%= goNowherePath %>' editable-text="userProfile.location">{{ userProfile.location }}</a>
+              <% } else { %>
+                {{ userProfile.location }}
+              <% } %>
+            </li>
+          </ul> 
+        </h5>
+        <p>
+          <% if(editable){ %>
+            <a href='<%= goNowherePath %>' editable-textarea="userProfile.about" e-rows="7" e-cols="40">
+              <pre>{{userProfile.about || '(no description)'}}</pre>
+            </a>
+          <% } else { %>
+            {{userProfile.about}}
+          <% } %>
+        </p>
+        <h5>
+          <ul class="nav nav-pills">
+            <li role="presentation" class="active">
+              <% if(editable){ %>
+                <a href='<%= goNowherePath %>' editable-radiolist="userProfile.additionalInfo.smoker" e-ng-options="s.value as s.text for s in smokerOptions">{{ showStatus(smokerOptions, userProfile.additionalInfo.smoker) }}</a>
+              <% } else { %>
+                {{userProfile.additionalInfo.smoker}}
+              <% } %>
+            </li>
+            <li role="presentation" class="active">
+              <% if(editable){ %>
+                <a href='<%= goNowherePath %>' editable-radiolist="userProfile.additionalInfo.drinks" e-ng-options="s.value as s.text for s in drinksOptions">{{ showStatus(drinksOptions, userProfile.additionalInfo.drinks) }}</a>
+              <% } else { %>
+                {{userProfile.additionalInfo.drinks}}
+              <% } %>
+            </li>
+            <li role="presentation" class="active">
+              <% if(editable){ %>
+                <a href='<%= goNowherePath %>' editable-radiolist="userProfile.additionalInfo.drugs" e-ng-options="s.value as s.text for s in drugsOptions">{{ showStatus(drugsOptions, userProfile.additionalInfo.drugs) }}</a>
+              <% } else { %>
+                {{userProfile.additionalInfo.drugs}}
+              <% } %>
+            </li>
+            <li role="presentation" class="active">
+              <% if(editable){ %>
+                <a href='<%= goNowherePath %>' editable-radiolist="userProfile.additionalInfo.diet" e-ng-options="s.value as s.text for s in dietOptions">{{ showStatus(dietOptions, userProfile.additionalInfo.diet) }}</a>
+              <% } else { %>
+                {{userProfile.additionalInfo.diet}}
+              <% } %>
+            </li>
+            <li role="presentation" class="active">
+              <% if(editable){ %>
+                <a href='<%= goNowherePath %>' editable-radiolist="userProfile.additionalInfo.religion" e-ng-options="s.value as s.text for s in religionOptions">{{ showStatus(religionOptions, userProfile.additionalInfo.religion) }}</a>
+              <% } else { %>
+                {{userProfile.additionalInfo.religion}}
+              <% } %>
+            </li>
+            <li role="presentation" class="active">
+              <% if(editable){ %>
+                <a href='<%= goNowherePath %>' editable-radiolist="userProfile.additionalInfo.occupation" e-ng-options="s.value as s.text for s in occupationOptions">{{ showStatus(occupationOptions, userProfile.additionalInfo.occupation) }}</a>
+              <% } else { %>
+                {{userProfile.additionalInfo.occupation}}
+              <% } %>
+            </li>
+            <li role="presentation" class="active">
+              <% if(editable){ %>
+                <a href='<%= goNowherePath %>' editable-text="userProfile.additionalInfo.school">{{ userProfile.additionalInfo.school }}</a>
+              <% } else { %>
+                {{ userProfile.additionalInfo.school }}
+              <% } %>
+            </li>
+          </ul>
+        </h5>
+        <p>
+          <% if(editable){ %>
+            <a href='<%= goNowherePath %>' class="btn btn-primary" role="button" ng-click="updateProfile()">Save</a>
+          <% } else { %>
+            <a href='<%= goNowherePath %>' class="btn btn-primary" role="button">Like</a>
+          <% } %>
+        </p>
       </div>
+      <% if(editable){ %>
+        <div>
+          <input type="file" file-model="myFile"/>
+          <button ng-click="uploadFile()">upload me</button>
+        </div>
+      <% } %>
     </li>
   </div>
 </div>
-<form id="uploadForm" enctype="multipart/form-data" action="/upload/photo" method="post">
-  <input type="file" name="profilePic" />
-  <input type="submit" value="Upload Image" name="submit">
-</form>

@@ -1,6 +1,40 @@
-var mainApp = angular.module('WhySoSingle', ['ngRoute', 'btford.socket-io']);
+var mainApp = angular.module('WhySoSingle', ['ngRoute', 'btford.socket-io', 'xeditable']);
 
 //$locationProvider.html5Mode(true);
+
+mainApp.directive('fileModel', ['$parse', function ($parse) {
+    return {
+        restrict: 'A',
+        link: function(scope, element, attrs) {
+            var model = $parse(attrs.fileModel);
+            var modelSetter = model.assign;
+            
+            element.bind('change', function(){
+                scope.$apply(function(){
+                    modelSetter(scope, element[0].files[0]);
+                });
+            });
+        }
+    };
+}]);
+
+mainApp.service('fileUpload', ['$http', function ($http) {
+    this.uploadFileToUrl = function(file, uploadUrl, callback){
+        var fd = new FormData();
+        fd.append('profilePic', file);
+        $http.post(uploadUrl, fd, {
+            transformRequest: angular.identity,
+            // headers: {'Content-Type': "multipart/form-data; boundary=----WebKitFormBoundaryffRA1BAOM5nKTmR1",
+            //           'Content-Disposition': "form-data; name=profilePic"}
+            headers: {'Content-Type': undefined}
+        })
+        .success(function(){
+          callback();
+        })
+        .error(function(){
+        });
+    }
+}]);
 
 mainApp.config(['$routeProvider', function($routeProvider) {
     $routeProvider.
@@ -14,7 +48,6 @@ mainApp.config(['$routeProvider', function($routeProvider) {
       // }).      
       when('/profile/:username',{
         templateUrl: function(parameters){
-          console.log(parameters);
           return '/profile/' + parameters.username;
         },
         controller: 'ProfileController'
@@ -54,6 +87,10 @@ mainApp.config(['$routeProvider', function($routeProvider) {
         redirectTo: '/about'
       });
   }]);
+
+mainApp.run(function(editableOptions) {
+  editableOptions.theme = 'bs3';
+});
 
 mainApp.factory('socket', function ($rootScope) {
   var socket = io.connect();
@@ -150,7 +187,7 @@ mainApp.service('searchService', function() {
   };
 });
 
-mainApp.controller('MainController', function($scope, $route, $routeParams, $location, $http, userSessionService) {
+mainApp.controller('MainController', function($scope, $window, $route, $routeParams, $location, $http, userSessionService) {
   //console.log(userSessionService.isLoggedIn());
   $scope.$route = $route;
   $scope.$routeParams = $routeParams;
@@ -176,6 +213,7 @@ mainApp.controller('MainController', function($scope, $route, $routeParams, $loc
     })
     .success(function(response) {
       $location.path('/');
+      $window.location.reload();
     });
   };
   $scope.goToHome = function() {
@@ -325,14 +363,60 @@ mainApp.controller('SearchController', function($scope, $routeParams, $location,
   };
 });
 
-mainApp.controller('ProfileController', function($scope, $routeParams, $http) { 
+mainApp.controller('ProfileController', function($scope, $window, $templateCache, $route, $routeParams, $http, $filter, $location, fileUpload) { 
   $http({
       url: '/getprofileinfo/' + $routeParams.username, 
       method: "GET"
     })
     .success(function(response) {
       $scope.userProfile = response;
+      $scope.showStatus = function(options, value) {
+        var selected = $filter('filter')(options, {value: value});
+        return (value && selected.length) ? selected[0].text : 'Not set';
+      };
+      $scope.updateProfile = function(){
+        $http.post('/profile/update', $scope.userProfile)
+        .success(function(data, status, headers, config){
+            $window.location.reload();
+        })
+        .error(function(data, status, headers, config){
+          /*handle non 200 statuses*/
+          console.log('error posting'); 
+        });
+      };
+    }); 
+  // TO DO: put this in its own file. Note: these lists define how the data gets saved to the server
+  $scope.genders = [{value: "male", text: "Guy"}, {value: "female", text: "Girl"}];
+  $scope.smokerOptions = [{value: "smoker", text: "Smoker"}, {value: "nonSmoker", text: "Non-smoker"}];
+  $scope.drinksOptions = [{value: "somedrinks", text: "Moderate Drinker"}, {value: "nodrinks", text: "Doesn't Drink"}];
+  $scope.drugsOptions = [{value: "yes", text: "Does Drugs"}, {value: "no", text: "Doesn't do drugs"}];
+  $scope.dietOptions = [{value: "omnivore", text: "Eats Anything"}, {value: "herbivore", text: "Vegetarian"}];
+  $scope.religionOptions = [{value: "notreligious", text: "Not Religious"}, {value: "other", text: "Other Religion"}];
+  $scope.occupationOptions = [{value: "engineer", text: "Engineer"}, {value: "notEngineer", text: "Not an engineer :("}];
+  $scope.uploadFile = function(){
+    var file = $scope.myFile;
+    console.log('file is ' );
+    console.dir(file);
+    var uploadUrl = "/upload/photo";
+    fileUpload.uploadFileToUrl(file, uploadUrl, function(){
+      $window.location.reload();
     });
+      // $location.path('/home');
+
+    // var currentPageTemplate = $route.current.templateUrl;
+    // $templateCache.remove(currentPageTemplate);
+    // $route.reload();
+  };
+  // $scope.submitPic = function(){
+  //     $http.post('/upload/photo', $scope.user)
+  //     .success(function(data, status, headers, config){
+  //         $location.path('/home');
+  //     })
+  //     .error(function(data, status, headers, config){
+  //       /*handle non 200 statuses*/
+  //       console.log('error posting');
+  //     });
+  //   };
   // $http({
   //     url: '/profileimg/' + '561496dc3a9300ad150218f1', 
   //     method: "GET"
@@ -389,3 +473,12 @@ mainApp.controller('LoginController', function($scope, $routeParams, $http, $loc
       });
     };
 });
+
+//turn to inline mode
+// $(function() {
+//   $.fn.editable.defaults.mode = 'inline';
+//   $('#username').editable();
+// });
+//$(document).ready(function() {
+    
+//});
