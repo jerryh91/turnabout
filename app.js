@@ -92,6 +92,7 @@ io.sockets.on('connection', function (socket)
   console.log('socket connection');
    
   //Register custom event:"my_message"
+  //Load existing Conversations for logged in user
 
   socket.emit('my_message', { message: 'welcome to the chat' });
 
@@ -111,9 +112,6 @@ io.sockets.on('connection', function (socket)
     //TODO:
     //Limit broadcast only to person 
     //listening/receiving this particular conversation
-
-    //CHANGE:
-    //Broadcast user sent data to ALL other sockets listening
     io.sockets.emit('my_message', data);
 
     //data.message, data.username (sender)
@@ -152,14 +150,6 @@ io.sockets.on('connection', function (socket)
         //DEBUG:
         //Create a Conversation, if no conversation
 
-        //Message:
-        //MUST be part of an existing Conversation
-        // convQuery = Conversation.findOne({'initiatorUsername': msgReceiverUsername, 'responderUsername': msgSenderUsername});
-        // convQuery.exec(function (err, convs) {
-        // if (err) return handleError(err);
-        // console.log(convs) // Space Ghost is a talk show host.
-        // });
-
         convQuery = {initiatorUsername: msgReceiverUsername, responderUsername: msgSenderUsername};
 
         Conversation.update(convQuery, {$push: {messages: msgID}}, function (err, raw)
@@ -186,11 +176,7 @@ io.sockets.on('connection', function (socket)
                                            responderUsername: msgReceiverUsername} ;
 
         Conversation.findOne(convQuery, function (err, conv) {
-       
-          //TODO:
-          //conv == null after sending subsequent msgs
-
-          //No Conversation
+       //No Conversation
           //PASS: 10/23
           if (!conv)
           {
