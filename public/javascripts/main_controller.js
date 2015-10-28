@@ -375,6 +375,7 @@ mainApp.controller('ProfileController', function($scope, $window, $templateCache
     })
     .success(function(response) {
       $scope.userProfile = response;
+      $scope.userProfileOriginal = response;
       $scope.showStatus = function(options, value) {
         var selected = $filter('filter')(options, {value: value});
         return (value && selected.length) ? selected[0].text : 'Not set';
@@ -388,6 +389,9 @@ mainApp.controller('ProfileController', function($scope, $window, $templateCache
           /*handle non 200 statuses*/
           console.log('error posting: /profile/update'); 
         });
+      };
+      $scope.dataChanged = function(){
+        return $scope.userProfileOriginal != $scope.userProfile;
       };
     }); 
   // TO DO: put this in its own file. Note: these lists define how the data gets saved to the server
