@@ -224,21 +224,21 @@ router.route('/createProfile')
 
 router.route('/loadMessages/:requestingUser')
 .get(function(req, res) {
-    console.log("entered load messages route with req: ", req.params.requestingUser);
+    console.log("entered load messages route with req username: ", req.params.requestingUser);
     User.findOne({'username': req.params.requestingUser}, function(err, user){
         if(err){
             console.log(err);
             return;
         }
         if(user){
-            //console.log("User found: " + req.params.requestingUser);
+            console.log("User found: " + req.params.requestingUser);
             if(user.conversations){
                 var foundConversations = [];
                 for(var i = 0; i < user.conversations.length; i++){
-                    console.log("user.conversations[i]: " + user.conversations[i]);
+                    console.log("user.conversations[" + i + "]: " + user.conversations[i]);
                     Conversation.findOne({'conversationID': user.conversations[i].conversationID}, function(err, conversation){
                         if(err){
-                            console.log("error here");
+                            console.log("err finding ConversationID: ");
                         }
                         if(conversation){
                             console.log("conversation found")

@@ -242,6 +242,7 @@ mainApp.controller('MessagesController', function($scope, $http, userSessionServ
   
   $http({
       url: '/loadMessages/' + $scope.username, 
+      // url: '/about', 
       method: "GET"
     })
     .success(function(response) {
@@ -385,7 +386,7 @@ mainApp.controller('ProfileController', function($scope, $window, $templateCache
         })
         .error(function(data, status, headers, config){
           /*handle non 200 statuses*/
-          console.log('error posting'); 
+          console.log('error posting: /profile/update'); 
         });
       };
     }); 
@@ -462,10 +463,11 @@ mainApp.controller('AboutController', function($scope, $location, $http, userSes
 
 mainApp.controller('LoginController', function($scope, $routeParams, $http, $location, userSessionService) {
     $scope.message = 'We\'re glad to have you. To get started, select Browse Profiles from the dropdown menu in the navigation bar.';
-    $scope.user = { username: "marcus.a.bennett@gmail.com",
-                    password: "asdf"};
+    $scope.user = { username: "abc@gmail.com",
+                    password: "ab"};
     
-    $scope.login = function(){
+    $scope.login = function()
+    {
       $http.post('/auth/login', $scope.user)
       .success(function(data, status, headers, config){
           userSessionService.setUserSession(data.user);
@@ -473,7 +475,7 @@ mainApp.controller('LoginController', function($scope, $routeParams, $http, $loc
       })
       .error(function(data, status, headers, config){
         /*handle non 200 statuses*/
-        console.log('error posting');
+        console.log('error posting: /auth/login');
       });
     };
 });

@@ -89,17 +89,16 @@ var io = require('socket.io').listen(app.listen(port, function()
 io.sockets.on('connection', function (socket) 
 {
 
-  console.log('socket connection');
+  console.log('socket connection event');
    
-  //Register custom event:"my_message"
   //Load existing Conversations for logged in user
+  //to message var
 
   socket.emit('my_message', { message: 'welcome to the chat' });
 
   //socket listens for "send" event
   socket.on('send', function (data) 
   {
-
 
     // if(socket.handshake.headers.cookie) 
     // {
@@ -134,6 +133,8 @@ io.sockets.on('connection', function (socket)
     var msgSenderUsername =  messageDoc.senderUsername;
     var msgReceiverUsername =  messageDoc.receiverUsername;
     var msgID = messageDoc._id;
+    console.log('messageDoc::msgID: ' + msgID);
+
 
     var msgSenderGender;
     var convQuery;
@@ -162,8 +163,9 @@ io.sockets.on('connection', function (socket)
           console.log("Added MsgID: ", msgID);
         });
 
-      } else
+      } else //female
       {
+
         console.log('msgSenderGender: ' + msgSenderGender);
         console.log('msgReceiverUsername: ' + msgReceiverUsername);
         //Message:
@@ -189,6 +191,9 @@ io.sockets.on('connection', function (socket)
               //Add new message to Conversation
               messages: [msgID]
             });
+             
+            var conversationDocID = conversationDoc._id;
+            console.log('conversationDocID: ' + conversationDocID);
 
             conversationDoc.save(function(err, newConv)
             {
@@ -199,8 +204,21 @@ io.sockets.on('connection', function (socket)
             
               console.log('Successfully added new Conv: ', newConv);
               // return done(null, newConv);
+
+
             });
 
+            //Add to User: new ConversationID
+            var userQuery = {username: msgSenderUsername};
+            User.update(userQuery, {$push: {conversations: conversationDocID + ''}}, function (err, raw)
+            {
+              if (err)
+              {
+                console.log(err);
+              }
+              console.log("Mongo raw response: ", raw);
+              console.log("Added convId: ", conversationDocID );
+            });
           }
           else
           { 
