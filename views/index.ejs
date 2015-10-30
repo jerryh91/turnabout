@@ -1,4 +1,6 @@
 <!-- C-->
+<!-- this is required to update the favicon.ico for some reason -->
+<link rel="shortcut icon" href="/favicon.ico?v=3" />
 
 <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.js"></script>
 
@@ -81,23 +83,29 @@
     </nav>
   </head>
   <body>
-    <div class="row">
-      <div class="col-md-2">
-        <ul class="nav nav-pills nav-stacked">
-          <li role="presentation">
-            <a href="#"><img src="glyphicons_free/glyphicons/png/glyphicons-23-fire.png" style="max-width: 20px; max-height: 20px; width: auto; height: auto; "/> &nbspSee Matches</a>
-          </li>
-          <li role="presentation">
-            <a href="#"><img src="glyphicons_free/glyphicons/png/glyphicons-11-envelope.png" style="max-width: 20px; max-height: 20px; width: auto; height: auto; "/> &nbspMessages <span class="badge">2</span></a>
-          </li>
-          <li role="presentation"><a href="#"><img src="glyphicons_free/glyphicons/png/glyphicons-20-heart-empty.png" style="max-width: 20px; max-height: 20px; width: auto; height: auto; "/> &nbspLikes <span class="badge">5</span></a></li>
-          <li role="presentation"><a href="#"><img src="glyphicons_free/glyphicons/png/glyphicons-13-heart.png" style="max-width: 20px; max-height: 20px; width: auto; height: auto; "/> &nbspWho I Liked</a></li>
-          <li role="presentation"><a href="#">Feature 5</a></li>
-          <li role="presentation"><a href="#">Feature 6</a></li>
-        </ul>
-      </div>
-      <div class="col-md-10">
-        <ng-view></ng-view>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-md-2" ng-show="userSession.isLoggedIn()">
+          <ul class="nav nav-pills nav-stacked">
+            <li role="presentation">
+              <a href="#"><img src="glyphicons_free/glyphicons/png/glyphicons-23-fire.png" style="max-width: 20px; max-height: 20px; width: auto; height: auto; "/> &nbspSee Matches</a>
+            </li>
+            <li role="presentation">
+              <a href="#"><img src="glyphicons_free/glyphicons/png/glyphicons-11-envelope.png" style="max-width: 20px; max-height: 20px; width: auto; height: auto; "/> &nbspMessages <span class="badge">2</span></a>
+            </li>
+            <li role="presentation"><a href="#"><img src="glyphicons_free/glyphicons/png/glyphicons-20-heart-empty.png" style="max-width: 20px; max-height: 20px; width: auto; height: auto; "/> &nbspLikes <span class="badge">5</span></a></li>
+            <li role="presentation"><a href="#"><img src="glyphicons_free/glyphicons/png/glyphicons-13-heart.png" style="max-width: 20px; max-height: 20px; width: auto; height: auto; "/> &nbspWho I Liked</a></li>
+            <li role="presentation"><a href="#">Feature 5</a></li>
+            <li role="presentation"><a href="#">Feature 6</a></li>
+          </ul>
+        </div>
+        <div class="col-md-10" ng-show="userSession.isLoggedIn()">
+          <ng-view></ng-view>
+        </div>
+        <!-- TODO: make this better (should be a better way than to use two ng-view's) -->
+        <div class="col-md-12" ng-hide="userSession.isLoggedIn()">
+          <ng-view></ng-view>
+        </div>
       </div>
     </div>
   </body>
