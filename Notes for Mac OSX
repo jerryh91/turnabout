@@ -12,9 +12,10 @@ Running mongo db
 
 Running express app
 1. open terminal
-2. navigate to project directory
-3. run "node app"
-4. Open safari and go to localhost:1337
+2. run “sudo -i”
+3. navigate to project directory
+4. run "node app"
+5. Open safari and go to localhost:1337
 
 Using nodemon and debug modules
 - command to use: "DEBUG=app nodemon app"

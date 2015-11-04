@@ -1,3 +1,10 @@
+// GET loadConversations
+//   return [{contactUsername: String, lastMessage: String, dateOfMessage: String (it will be of the form Date.toJSON())}]
+// GET loadConversation/:username
+//   return [{username: String, message: String, dateOfMessage: String}]
+// POST sendmessage
+//   send JSON -> {senderUsername: String, receiverUsername: String, content: String}
+
 
 var express = require('express');
 var router = express.Router();
@@ -221,6 +228,72 @@ router.route('/createProfile')
 .get(function(req, res) {
     res.render('createProfile', {title: 'Sign Up!'});
 });
+
+router.route('/loadConversations')
+.get(function(req, res) {
+  var result = [];
+  for(var i = 0; i < req.user.conversations.length; i++){
+    Conversation.findOne({'_id': req.user.conversations[i]}, function(err, conversation){
+      if(err){
+        console.log(err);
+      }
+      if(conversation){
+        var contactUsername = (conversation.initiatorUsername == req.user.username) ? conversation.responderUsername : conversation.initiatorUsername;
+        var lastMessage = conversation.messages[conversation.messages.length-1].content;
+        var dateOfMessage = conversation.messages[conversation.messages.length-1].date;
+        var resultJSON = {contactUsername: contactUsername,
+                                lastMessage: lastMessage,
+                                dateOfMessage: dateOfMessage};
+        result.push(resultJSON);
+      } else {
+        console.log("conversation not found!");
+      }
+      if(result.length == req.user.conversations.length){
+        res.json(result);
+      }
+    });
+  }
+});
+
+router.route('/loadConversation/:username')
+.get(function(req, res){
+  //look for conversation
+  Conversation.findOne({'initiatorUsername': req.user.username, 'responderUsername': req.params.username}, function(err, conversation){
+    if(err){
+      console.log(err);
+    }
+    if(conversation){
+      res.json(grabConversation(conversation));
+    } else {
+      //look again, but swap the initiator and responder username
+      // TODO: make this better. Maybe an array of usernames is better?
+      Conversation.findOne({'initiatorUsername': req.params.username, 'responderUsername': req.user.username}, function(err, conversation2){
+        if(err){
+          console.log(err);
+        }
+        if(conversation2){
+          res.json(grabConversation(conversation2));
+        } else {
+          console.log("conversation not found!");
+        }
+      });
+    };  
+  });
+});
+
+function grabConversation(conversation){
+  var result = [];
+  for(var i = 0; i < conversation.messages.length; i++){
+    var username = conversation.messages[i].senderUsername;
+    var message = conversation.messages[i].content;
+    var dateOfMessage = conversation.messages[i].date;
+    var messageJSON = {username: username,
+                       message: message,
+                       dateOfMessage: dateOfMessage};
+    result.push(messageJSON);
+  }
+  return result;
+}
 
 router.route('/loadMessages/:requestingUser')
 .get(function(req, res) {

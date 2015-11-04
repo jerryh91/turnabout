@@ -18,7 +18,7 @@ var userSchema = new mongoose.Schema({
     location: String,
     age: String,
     gender: String,
-    conversations: [{conversationID: String}],
+    conversations: [{type: String, ref: 'Conversation'}],
     about: String,
     lastOnline: String,
     additionalInfo: {
@@ -36,22 +36,26 @@ var userSchema = new mongoose.Schema({
 var conversationSchema = new mongoose.Schema({
     initiatorUsername: String,
     responderUsername: String,
-    messages: [{ type: String, ref: 'Message' }]
+    messages: [{ senderUsername: String, 
+                 receiverUsername: String, 
+                 content: String,
+                 date: String }]
 });
 
-var messageSchema = new mongoose.Schema({
-    senderUsername: String, 
-    receiverUsername:String, 
-    content: String
-});
+// var messageSchema = new mongoose.Schema({
+//     senderUsername: String, 
+//     receiverUsername: String, 
+//     content: String,
+//     date: String
+// });
 
 //Model declaration: "User", "Conversation"
 mongoose.model("User", userSchema);
 mongoose.model("Conversation", conversationSchema);
-mongoose.model("Message", messageSchema);
+// mongoose.model("Message", messageSchema);
 
 module.exports = {
 	userSchema: userSchema,
-    conversationSchema: conversationSchema,
-    messageSchema: messageSchema
+    conversationSchema: conversationSchema
+    // messageSchema: messageSchema
 };

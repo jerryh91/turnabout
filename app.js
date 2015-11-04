@@ -24,7 +24,7 @@ initPassport(passport);
 mongoose.connect('mongodb://localhost:27017/whysosingle');
 var User = mongoose.model('User');
 var Conversation = mongoose.model('Conversation');
-var Message = mongoose.model('Message');
+// var Message = mongoose.model('Message');
 
 var app = express();
 var port = 1337;
@@ -94,11 +94,29 @@ io.sockets.on('connection', function (socket)
   //Load existing Conversations for logged in user
   //to message var
 
-  socket.emit('my_message', { message: 'welcome to the chat' });
+  socket.emit('joined_server', { message: 'welcome to the chat' });
+
+  socket.on('join', function (data) {
+    socket.join(data.username); // We are using room of socket io
+    console.log("socket io room joined: " + data.username);
+  });
 
   //socket listens for "send" event
   socket.on('send', function (data) 
   {
+    var msgSenderUsername =  data.senderUsername;
+    var msgReceiverUsername =  data.receiverUsername;
+    var msgDate = data.date;
+    var msgContent = data.content;
+    
+    var messageObject = {
+      senderUsername: msgSenderUsername,
+      receiverUsername: msgReceiverUsername,
+      content: msgContent,
+      date: msgDate
+    };
+
+    console.log(messageObject);
 
     // if(socket.handshake.headers.cookie) 
     // {
@@ -111,133 +129,196 @@ io.sockets.on('connection', function (socket)
     //TODO:
     //Limit broadcast only to person 
     //listening/receiving this particular conversation
-    io.sockets.emit('my_message', data);
+    //io.sockets.emit('my_message', data);
+    io.sockets.in(msgReceiverUsername).emit('new_message', {username: msgSenderUsername, message: msgContent, dateOfMessage: msgDate});
+    io.sockets.in(msgSenderUsername).emit('new_message', {username: msgSenderUsername, message: msgContent, dateOfMessage: msgDate});
 
     //data.message, data.username (sender)
-    console.log("data.message: " + data.message);
-    console.log("data.username: " + data.username);
+    // console.log("data.message: " + data.message);
+    // console.log("data.username: " + data.username);
 
     //Create message document
     //add doc to Conversation doc's msg list
     // TODO: 
     // Retrieve receiver ID
-    var messageDoc = new Message({
-      senderUsername: data.username,
-      receiverUsername: 'test1',
-      content: data.message
-    });
+    // var messageDoc = {
+    //   senderUsername: data.username,
+    //   receiverUsername: 'test1',
+    //   content: data.message
+    // };
 
     //C:\Projects\whysosingle\app_js.txt
         
     //Find Gender of Sender Profile
-    var msgSenderUsername =  messageDoc.senderUsername;
-    var msgReceiverUsername =  messageDoc.receiverUsername;
-    var msgID = messageDoc._id;
-    console.log('messageDoc::msgID: ' + msgID);
-
-
-    var msgSenderGender;
-    var convQuery;
-    var senderQuery = User.findOne({ username: msgSenderUsername});
     
-    senderQuery.exec(function (err, user) {
-      msgSenderGender = user.gender;
-      console.log("msgSenderGender (found in db): " + msgSenderGender);
 
-      //PASS:10/22
-      if (msgSenderGender == "male")
-      {
-        console.log('msgSenderGender: male');
-        //DEBUG:
-        //Create a Conversation, if no conversation
+    // var msgID = messageDoc._id;
+    // console.log('messageDoc::msgID: ' + msgID);
 
-        convQuery = {initiatorUsername: msgReceiverUsername, responderUsername: msgSenderUsername};
+    Conversation.findOne()
+                .or([{initiatorUsername: msgSenderUsername, responderUsername: msgReceiverUsername},
+                     {initiatorUsername: msgReceiverUsername, responderUsername: msgSenderUsername}])
+                .exec(function(err, conversation){
+                  if(err){
+                    console.log(err);
+                  }
+                  if(conversation){
+                    // 
+                    // ADD TO EXISTING CONVERSATION
+                    // 
+                    conversation.messages.push(messageObject);
+                    Conversation.findOneAndUpdate({_id: conversation._id}, {$push: {messages: messageObject}}, function(err, raw){
+                      if(err){
+                        console.log(err);
+                      }
+                      if(raw){
+                        console.log("updated conversation");
+                      } else{
+                        console.log("conversation not found!");
+                      }
+                    });
+                  } else{
+                    // 
+                    // CREATE CONVERSATION
+                    // 
+                    console.log("conversation not found. Will create conversation");
+                    // checkIfValidConversation()
+                    var conversationDoc = new Conversation({
+                      initiatorUsername: msgSenderUsername,
+                      responderUsername: msgReceiverUsername,
+                      messages: [messageObject]
+                    });
+                    conversationDoc.save(function(err, newConv){
+                      if(err){
+                        console.log(err);
+                      }
+                      console.log('Successfully added new Conv: ', newConv);
+                      User.findOneAndUpdate({username: newConv.initiatorUsername}, {$push: {conversations: newConv._id}}, function(err, raw){
+                        if(err){
+                          console.log(err);
+                        }
+                        if(raw){
+                          console.log("updated ", newConv.initiatorUsername);
+                        } else{
+                          console.log("user doesn't exist: ", newConv.initiatorUsername);
+                        }
+                      });
+                      User.findOneAndUpdate({username: newConv.responderUsername}, {$push: {conversations: newConv._id}}, function(err, raw){
+                        if(err){
+                          console.log(err);
+                        }
+                        if(raw){
+                          console.log("updated ", newConv.responderUsername);
+                        } else{
+                          console.log("user doesn't exist: ", newConv.responderUsername);
+                        }
+                      });
+                    });
+                  }
+                });
 
-        Conversation.update(convQuery, {$push: {messages: msgID}}, function (err, raw)
-        {
-          if (err)
-          {
-            console.log(err);
-          }
-          console.log("Mongo raw response: ", raw);
-          console.log("Added MsgID: ", msgID);
-        });
+    // var msgSenderGender;
+    // var convQuery;
+    // var senderQuery = User.findOne({ username: msgSenderUsername});
+    
+    // senderQuery.exec(function (err, user) {
+    //   msgSenderGender = user.gender;
+    //   console.log("msgSenderGender (found in db): " + msgSenderGender);
 
-      } else //female
-      {
+    //   //PASS:10/22
+    //   if (msgSenderGender == "male")
+    //   {
+    //     console.log('msgSenderGender: male');
+    //     //DEBUG:
+    //     //Create a Conversation, if no conversation
 
-        console.log('msgSenderGender: ' + msgSenderGender);
-        console.log('msgReceiverUsername: ' + msgReceiverUsername);
-        //Message:
-        //part of Existing Conversation
-        //or
-        //initial messag in new Conversation 
+    //     convQuery = {initiatorUsername: msgReceiverUsername, responderUsername: msgSenderUsername};
 
-        //Check existing Conversation
-        convQuery = { initiatorUsername:msgSenderUsername,
-                                           responderUsername: msgReceiverUsername} ;
+    //     Conversation.update(convQuery, {$push: {messages: msgID}}, function (err, raw)
+    //     {
+    //       if (err)
+    //       {
+    //         console.log(err);
+    //       }
+    //       console.log("Mongo raw response: ", raw);
+    //       console.log("Added MsgID: ", msgID);
+    //     });
 
-        Conversation.findOne(convQuery, function (err, conv) {
-       //No Conversation
-          //PASS: 10/23
-          if (!conv)
-          {
-            console.log('no conversationDoc: ');
-            //Create new Conversation
-             var conversationDoc = new Conversation ({
-              initiatorUsername: msgSenderUsername,
-              responderUsername: msgReceiverUsername,
-              //TODO: 
-              //Add new message to Conversation
-              messages: [msgID]
-            });
+    //   } else //female
+    //   {
+
+    //     console.log('msgSenderGender: ' + msgSenderGender);
+    //     console.log('msgReceiverUsername: ' + msgReceiverUsername);
+    //     //Message:
+    //     //part of Existing Conversation
+    //     //or
+    //     //initial messag in new Conversation 
+
+    //     //Check existing Conversation
+    //     convQuery = { initiatorUsername:msgSenderUsername,
+    //                                        responderUsername: msgReceiverUsername} ;
+
+    //     Conversation.findOne(convQuery, function (err, conv) {
+    //    //No Conversation
+    //       //PASS: 10/23
+    //       if (!conv)
+    //       {
+    //         console.log('no conversationDoc: ');
+    //         //Create new Conversation
+    //          var conversationDoc = new Conversation ({
+    //           initiatorUsername: msgSenderUsername,
+    //           responderUsername: msgReceiverUsername,
+    //           //TODO: 
+    //           //Add new message to Conversation
+    //           messages: [msgID]
+    //         });
              
-            var conversationDocID = conversationDoc._id;
-            console.log('conversationDocID: ' + conversationDocID);
+    //         var conversationDocID = conversationDoc._id;
+    //         console.log('conversationDocID: ' + conversationDocID);
 
-            conversationDoc.save(function(err, newConv)
-            {
-              if (err)
-              {
-                return (err, false);
-              }
+    //         conversationDoc.save(function(err, newConv)
+    //         {
+    //           if (err)
+    //           {
+    //             return (err, false);
+    //           }
             
-              console.log('Successfully added new Conv: ', newConv);
-              // return done(null, newConv);
+    //           console.log('Successfully added new Conv: ', newConv);
+    //           // return done(null, newConv);
 
 
-            });
+    //         });
 
-            //Add to User: new ConversationID
-            var userQuery = {username: msgSenderUsername};
-            User.update(userQuery, {$push: {conversations: conversationDocID + ''}}, function (err, raw)
-            {
-              if (err)
-              {
-                console.log(err);
-              }
-              console.log("Mongo raw response: ", raw);
-              console.log("Added convId: ", conversationDocID );
-            });
-          }
-          else
-          { 
-            //add message to existing Conversation
-            // conv.messages.add()
-            conv.messages.push(msgID);
-            conv.save(function(err, updateConv) 
-            {
-              if (err)
-              {
-                return (err, false);
-              }
+    //         //Add to User: new ConversationID
+    //         var userQuery = {username: msgSenderUsername};
+    //         User.update(userQuery, {$push: {conversations: conversationDocID + ''}}, function (err, raw)
+    //         {
+    //           if (err)
+    //           {
+    //             console.log(err);
+    //           }
+    //           console.log("Mongo raw response: ", raw);
+    //           console.log("Added convId: ", conversationDocID );
+    //         });
+    //       }
+    //       else
+    //       { 
+    //         //add message to existing Conversation
+    //         // conv.messages.add()
+    //         conv.messages.push(msgID);
+    //         conv.save(function(err, updateConv) 
+    //         {
+    //           if (err)
+    //           {
+    //             return (err, false);
+    //           }
 
-              console.log('successfully added ', msgID, 'to existing conv');
-            });
-          }
-        });
-      }
-    });
+    //           console.log('successfully added ', msgID, 'to existing conv');
+    //         });
+    //       }
+    //     });
+    //   }
+    // });
   });
 });
 module.exports = app;

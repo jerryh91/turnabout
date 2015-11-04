@@ -240,18 +240,44 @@ mainApp.controller('MessagesController', function($scope, $http, userSessionServ
   $scope.messageDisplay = '';
   $scope.username = userSessionService.getUserSession().username;
   
+  // $http({
+  //     url: '/loadMessages/' + $scope.username, 
+  //     // url: '/about', 
+  //     method: "GET"
+  //   })
+  //   .success(function(response) {
+  //     console.log("success loadMessages " + response);
+  //   });
+
   $http({
-      url: '/loadMessages/' + $scope.username, 
+      url: '/loadConversations', 
       // url: '/about', 
       method: "GET"
     })
     .success(function(response) {
-      console.log("success loadMessages " + response);
+      console.log("success with loadConversations: ", response);
     });
 
-  socket.on('init')
+  $http({
+      url: '/loadConversation/test2', 
+      // url: '/about', 
+      method: "GET"
+    })
+    .success(function(response) {
+      console.log("success with loadConversation: ", response);
+    });
 
-  socket.on('my_message', function(data){
+  socket.on('joined_server', function(data){
+    if(data.message) 
+    {
+      $scope.messageDisplay += (data.username ? data.username : 'Server') + ': ' + data.message + '\n';
+      socket.emit('join', {username: $scope.username});
+    } else {
+      console.log("No msg: ", data.message);
+    }
+  });
+
+  socket.on('new_message', function(data){
     if(data.message) 
     {
       $scope.messageDisplay += (data.username ? data.username : 'Server') + ': ' + data.message + '\n';
@@ -261,7 +287,7 @@ mainApp.controller('MessagesController', function($scope, $http, userSessionServ
   });
   
   $scope.sendMessage = function () {
-    socket.emit('send', { message: $scope.messageContent, username: $scope.username });
+    socket.emit('send', { content: $scope.messageContent, senderUsername: $scope.username, receiverUsername: $scope.receiverUsername, date: (new Date()).toJSON()});
 
     // add the message to our model locally
     //$scope.messageDisplay += 'You: ' + $scope.messageContent + '\n';

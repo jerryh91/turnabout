@@ -5,8 +5,9 @@
         <br>    
     </div>
     <div class="controls">
+        <input type="text" class="form-control" ng-model="receiverUsername" placeholder="receiverUsername" style='width: 500px'/><br>
         <form ng-submit="sendMessage()">
-            <input id="field" ng-model="messageContent" style="width:350px;">
+            <input id="field" ng-model="messageContent" style="width:350px;" placeholder=" message">
             <input id="send" type="button" ng-click="sendMessage()" value="send">
         </form>
     </div>

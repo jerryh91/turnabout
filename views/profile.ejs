@@ -102,7 +102,7 @@
       </h5>
       <p>
         <% if(editable){ %>
-          <a href='<%= goNowherePath %>' ng-show="dataChanged()" class="btn btn-primary" role="button" ng-click="updateProfile()">Save</a>
+          <a href='<%= goNowherePath %>' class="btn btn-primary" role="button" ng-click="updateProfile()">Save</a>
         <% } else { %>
           <a href='<%= goNowherePath %>' class="btn btn-primary" role="button">Like</a>
         <% } %>

@@ -99,12 +99,14 @@
             <li role="presentation"><a href="#">Feature 6</a></li>
           </ul>
         </div>
-        <div class="col-md-10" ng-show="userSession.isLoggedIn()">
-          <ng-view></ng-view>
-        </div>
-        <!-- TODO: make this better (should be a better way than to use two ng-view's) -->
-        <div class="col-md-12" ng-hide="userSession.isLoggedIn()">
-          <ng-view></ng-view>
+        <div ng-switch="userSession.isLoggedIn()">
+          <div class="col-md-10" ng-switch-when="true">
+            <ng-view></ng-view>
+          </div>
+          <!-- TODO: make this better (should be a better way than to use two ng-view's) -->
+          <div class="col-md-12" ng-switch-when="false">
+            <ng-view></ng-view>
+          </div>
         </div>
       </div>
     </div>
