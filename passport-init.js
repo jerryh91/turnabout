@@ -4,6 +4,22 @@ var bCrypt = require('bcrypt-nodejs');
 var mongoose = require('mongoose');
 var User = mongoose.model('User');
 
+var nodemailer = require('nodemailer');
+var transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'mb35534.ifttt@gmail.com',
+        pass: 'whysosingle'
+    }
+}, {
+    // default values for sendMail method
+    from: 'mb35534.ifttt@gmail.com',
+    headers: {
+        'My-Awesome-Header': '123'
+    }
+});
+
+
 module.exports = function (passport)
 {
     //Authentication APIs
@@ -108,6 +124,7 @@ module.exports = function (passport)
                   newUser.location = req.body.location;
                   newUser.age = req.body.age;
                   newUser.gender = req.body.gender;
+                  newUser.survey = req.body.survey;
 
                   newUser.save(function(err, newUser)
                     {
@@ -117,6 +134,11 @@ module.exports = function (passport)
                       }
                      
                       console.log('Successfully added user: ' + username + 'db');
+                      transporter.sendMail({
+                          to: 'marcus.a.bennett@gmail.com',
+                          subject: 'hello',
+                          text: 'hello world!'
+                      });
                       return done(null, newUser);
                     });
                 }

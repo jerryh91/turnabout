@@ -181,49 +181,58 @@ io.sockets.on('connection', function (socket)
                     // 
                     // CREATE CONVERSATION
                     // 
-                    console.log("conversation not found. Will create conversation");
-                    // checkIfValidConversation()
-                    var conversationDoc = new Conversation({
-                      initiatorUsername: msgSenderUsername,
-                      responderUsername: msgReceiverUsername,
-                      messages: [messageObject]
-                    });
-                    conversationDoc.save(function(err, newConv){
-                      if(err){
-                        console.log(err);
-                      }
-                      console.log('Successfully added new Conv: ', newConv);
-                      User.findOneAndUpdate({username: newConv.initiatorUsername}, {$push: {conversations: newConv._id}}, function(err, raw){
-                        if(err){
-                          console.log(err);
-                        }
-                        if(raw){
-                          console.log("updated ", newConv.initiatorUsername);
-                        } else{
-                          console.log("user doesn't exist: ", newConv.initiatorUsername);
-                        }
+                    console.log("conversation not found. Will create conversation if valid");
+                    checkIfValidConversation(msgSenderUsername, function (){
+                      var conversationDoc = new Conversation({
+                        initiatorUsername: msgSenderUsername,
+                        responderUsername: msgReceiverUsername,
+                        messages: [messageObject]
                       });
-                      User.findOneAndUpdate({username: newConv.responderUsername}, {$push: {conversations: newConv._id}}, function(err, raw){
+                      conversationDoc.save(function(err, newConv){
                         if(err){
                           console.log(err);
                         }
-                        if(raw){
-                          console.log("updated ", newConv.responderUsername);
-                        } else{
-                          console.log("user doesn't exist: ", newConv.responderUsername);
-                        }
+                        console.log('Successfully added new Conv: ', newConv);
+                        User.findOneAndUpdate({username: newConv.initiatorUsername}, {$push: {conversations: newConv._id}}, function(err, raw){
+                          if(err){
+                            console.log(err);
+                          }
+                          if(raw){
+                            console.log("updated ", newConv.initiatorUsername);
+                          } else{
+                            console.log("user doesn't exist: ", newConv.initiatorUsername);
+                          }
+                        });
+                        User.findOneAndUpdate({username: newConv.responderUsername}, {$push: {conversations: newConv._id}}, function(err, raw){
+                          if(err){
+                            console.log(err);
+                          }
+                          if(raw){
+                            console.log("updated ", newConv.responderUsername);
+                          } else{
+                            console.log("user doesn't exist: ", newConv.responderUsername);
+                          }
+                        });
                       });
                     });
                   }
                 });
 
-    // var msgSenderGender;
-    // var convQuery;
-    // var senderQuery = User.findOne({ username: msgSenderUsername});
-    
-    // senderQuery.exec(function (err, user) {
-    //   msgSenderGender = user.gender;
-    //   console.log("msgSenderGender (found in db): " + msgSenderGender);
+function checkIfValidConversation(senderUsername, callback){
+  var msgSenderGender;
+  var convQuery;
+  var senderQuery = User.findOne({ username: senderUsername});
+  
+  senderQuery.exec(function (err, user) {
+    msgSenderGender = user.gender;
+    console.log("msgSenderGender (found in db): " + msgSenderGender);
+    if(msgSenderGender == "female"){
+      callback();
+    } else {
+      console.log("gender male. Cannot start conversation");
+    }
+  });
+}
 
     //   //PASS:10/22
     //   if (msgSenderGender == "male")

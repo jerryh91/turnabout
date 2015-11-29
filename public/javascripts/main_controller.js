@@ -159,6 +159,29 @@ mainApp.factory('userSessionService', function(){
   };
 });
 
+mainApp.factory('authHttpResponseInterceptor',['$q','$location', function($q,$location){
+    return {
+        response: function(response){
+            if (response.status === 401) {
+                console.log("Response 401");
+            }
+            return response || $q.when(response);
+        },
+        responseError: function(rejection) {
+            if (rejection.status === 401) {
+                console.log("Response Error 401",rejection);
+                $location.path('/login'); // how does this work?? -> .search('returnTo', $location.path());
+            }
+            return $q.reject(rejection);
+        }
+    }
+}]);
+
+mainApp.config(['$httpProvider',function($httpProvider) {
+    //Http Intercpetor to check auth failures for xhr requests
+    $httpProvider.interceptors.push('authHttpResponseInterceptor');
+}]);
+
 mainApp.service('searchService', function() {
   var searchResults = [];
   var searchQuery = [];
@@ -302,6 +325,7 @@ mainApp.controller('MessagesController', function($scope, $http, userSessionServ
 });
 
 mainApp.controller('CreateProfileController', function($scope, $location, $http) {
+  $scope.questions = [{}];
   $scope.profile = {
     email: "abc@gmail.com",
     password: "ab",
@@ -310,6 +334,14 @@ mainApp.controller('CreateProfileController', function($scope, $location, $http)
     age: 24,
     gender: "female"
   };
+  $http({
+      url: '/getSurvey', 
+      method: "GET"
+    })
+    .success(function(response) {
+      //console.log(response);
+      $scope.profile.survey = response;
+    });
   $scope.fileLocation = $location;
   $scope.reset = function() {
     $scope.profile = {};
@@ -475,7 +507,6 @@ mainApp.controller('HomeController', function($scope) {
 });
 
 mainApp.controller('AboutController', function($scope, $location, $http, userSessionService) {
-    $scope.message = 'We\'re glad to have you. To get started, signup or login below.';
     $http({
       url: '/auth/loggedIn', 
       method: "GET"
@@ -492,6 +523,18 @@ mainApp.controller('AboutController', function($scope, $location, $http, userSes
 });
 
 mainApp.controller('LoginController', function($scope, $routeParams, $http, $location, userSessionService) {
+    $http({
+      url: '/auth/loggedIn', 
+      method: "GET"
+    })
+    .success(function(response) {
+      //console.log(response);
+      if(response.notLoggedIn){
+        userSessionService.resetUserSession();
+      } else {
+        userSessionService.setUserSession(response);
+      }
+    });
     $scope.message = 'We\'re glad to have you. To get started, select Browse Profiles from the dropdown menu in the navigation bar.';
     $scope.user = { username: "abc@gmail.com",
                     password: "ab"};
@@ -508,6 +551,17 @@ mainApp.controller('LoginController', function($scope, $routeParams, $http, $loc
         console.log('error posting: /auth/login');
       });
     };
+});
+
+
+var jumboHeight = $('.jumbotron').outerHeight();
+function parallax(){
+    var scrolled = $(window).scrollTop();
+    $('.bg').css('height', (jumboHeight-scrolled) + 'px');
+}
+
+$(window).scroll(function(e){
+    // parallax();
 });
 
 //turn to inline mode

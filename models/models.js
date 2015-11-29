@@ -30,7 +30,8 @@ var userSchema = new mongoose.Schema({
         occupation: String,
         personalityType: String,
         school: String}, 
-    photos: [{photoID: String}]
+    photos: [{photoID: String}],
+    survey: [{question: String, answers: [String], userResponse: String}]
 });
 
 var conversationSchema = new mongoose.Schema({

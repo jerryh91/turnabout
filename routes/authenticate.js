@@ -22,6 +22,8 @@ module.exports = function(passport){
     router.post('/signup', passport.authenticate('signup'), function(req, res){
         console.log(req.user);
         //res.sendStatus(200);
+        // need to logout after creating account because the email address needs to be verified before they can log in
+        req.logout();
         res.send(req.user);
     });
 

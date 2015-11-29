@@ -16,6 +16,14 @@ var Conversation = mongoose.model('Conversation');
 var fs = require('fs');
 var Grid = require('gridfs-stream')
 
+var survey = 
+[ {question: "Would you be willing to pay for personal advice on how to improve your relationship skills?", answers: ["Yes", "No"]},
+  {question: "How many dating sites have you used in the past?",
+   answers: ["None", "1", "2", "More than 2"]},
+  {question: "What is your opinion on dating sites?",
+   answers: ["They are a great tool", "They're a waste of time because they don't work", "I'm too embarrassed to use them", "I don't feel the need for them"]} 
+];
+
 var filteredProfiles = [
     { id: "1", username: "BobbyBoy", image_src: "http://24.media.tumblr.com/tumblr_m3fqbmn8cF1qe4cuxo1_500.jpg", points: "628", detail: "I live by myself, I pay my own rent, I wear socks that match and I love my mom. I am a confident, attractive & comedic person. I do stunt work. Have you ever seen it in a movie when a hot actor has to reveal his naked ass? That’s my job. Oh, and I’m in the fitness biz, as well as back in school finishing up my pre-med reqs." },
     { id: "2", username: "some_guy", image_src: "http://25.media.tumblr.com/tumblr_m3d737UrjX1rurzxho1_400.jpg", points: "2043", detail: "Basically I love life and I love living life. I enjoy the outdoors, traveling, restaurants, laughing, goIng to cultural events, and sociaLizing with quality peOple. Its just better liVing and sharing lifE with someone else"},
@@ -32,7 +40,7 @@ conn.once('open', function() {
   gfs = Grid(conn.db);
 });
 
-router.post('/upload/photo', upload.single('profilePic'), function(req, res, next){
+router.post('/upload/photo', isAuthenticated, upload.single('profilePic'), function(req, res, next){
   //multer handles multipart/form-data so we just need to grab req.file
   var writestream = gfs.createWriteStream({
     filename: req.file.name,
@@ -85,7 +93,7 @@ router.post('/upload/photo', upload.single('profilePic'), function(req, res, nex
   });
 }); 
 
-router.post('/profile/update', function(req, res, next){
+router.post('/profile/update', isAuthenticated, function(req, res, next){
   var username = req.user.username;
   var updatedProfile = req.body;
   User.findOneAndUpdate({'username': username}, updatedProfile, function(err, user)
@@ -108,7 +116,7 @@ router.post('/profile/update', function(req, res, next){
   res.send("Success!");
 });
 
-router.get('/profile/:id', function(req, res) {
+router.get('/profile/:id', isAuthenticated, function(req, res) {
   var username = req.params.id;
   User.findOne({'username': username}, function(err, user)
   {
@@ -192,7 +200,7 @@ router.route('/about')
 
 //Messages List View
 router.route('/messages')
-.get(function(req, res) {
+.get(isAuthenticated, function(req, res) {
 
     //Add msgs to Db
     res.render('message_pg');
@@ -204,7 +212,7 @@ router.route('/login')
 });
 
 router.route('/browse')
-.get(function(req, res) {
+.get(isAuthenticated, function(req, res) {
     //Query from MongoDB
     res.render('browse', {title: 'express'});
 });
@@ -215,7 +223,7 @@ router.route('/blog')
 });
 
 router.route('/search')
-.get(function(req, res) {
+.get(isAuthenticated, function(req, res) {
     if (req.query.location) {
         // PUT SEARCH LOGIC HERE
         res.json(filteredProfiles);
@@ -229,8 +237,13 @@ router.route('/createProfile')
     res.render('createProfile', {title: 'Sign Up!'});
 });
 
-router.route('/loadConversations')
+router.route('/getSurvey')
 .get(function(req, res) {
+    res.json(survey);
+});
+
+router.route('/loadConversations')
+.get(isAuthenticated, function(req, res) {
   var result = [];
   for(var i = 0; i < req.user.conversations.length; i++){
     Conversation.findOne({'_id': req.user.conversations[i]}, function(err, conversation){
@@ -256,7 +269,7 @@ router.route('/loadConversations')
 });
 
 router.route('/loadConversation/:username')
-.get(function(req, res){
+.get(isAuthenticated, function(req, res){
   //look for conversation
   Conversation.findOne({'initiatorUsername': req.user.username, 'responderUsername': req.params.username}, function(err, conversation){
     if(err){
@@ -296,7 +309,7 @@ function grabConversation(conversation){
 }
 
 router.route('/loadMessages/:requestingUser')
-.get(function(req, res) {
+.get(isAuthenticated, function(req, res) {
     console.log("entered load messages route with req username: ", req.params.requestingUser);
     User.findOne({'username': req.params.requestingUser}, function(err, user){
         if(err){
@@ -334,7 +347,7 @@ router.route('/loadMessages/:requestingUser')
 });
 
 router.route('/getprofileinfo/:id')
-.get(function(req, res) {
+.get(isAuthenticated, function(req, res) {
 
         var profileID = req.params.id;
 
@@ -357,7 +370,26 @@ router.route('/getprofileinfo/:id')
         // res.json(filteredProfiles[0]);
 });
 
+function isAuthenticated(req, res, next) {
 
+  // do any checks you want to in here
+
+  // CHECK THE USER STORED IN SESSION FOR A CUSTOM VARIABLE
+  // you can do this however you want with whatever variables you set up
+
+  if(!req.user){
+    // IF A USER ISN'T LOGGED IN, THEN REDIRECT THEM SOMEWHERE
+    console.log("user is not authenticated");
+    // res.redirect('/');
+    // res.render('login');
+    // send not authorized status. Angular code should redirect to login
+    res.sendStatus(401);
+  }
+  else{
+    console.log("user is authenticated");
+    return next();
+  }
+}
 
 //.put: update existing profile with id
 // .put(function(req, res) {

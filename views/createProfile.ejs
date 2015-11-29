@@ -27,6 +27,20 @@
     <input class="btn btn-default" type="button" ng-click="reset()" value="Reset" />
     <button class="btn btn-default">Create</button>
   </form>
+  
+  <div id="questionList" class="list-group">
+    <li class="thumbnail col-sm-12" ng-repeat="question in profile.survey">
+      <h3> {{question.question}} </h3>
 
-  <pre>form = {{profile | json}}</pre>
+      <div ng-repeat="answer in question.answers">
+        <div class="input-group"> 
+          <span class="input-group-addon">
+            <input type="radio" ng-model="profile.survey[$parent.$index].userResponse" value={{answer}}></input>
+          </span>
+          <span class="input-group-addon" id="basic-addon2">{{answer}}</span>
+        </div>
+      </div>
+    </li>
+  </div>
+  <pre>profile = {{profile | json}}</pre>
 </div>
