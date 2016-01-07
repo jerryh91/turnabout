@@ -262,7 +262,9 @@ mainApp.controller('MessagesController', function($scope, $http, userSessionServ
   console.log("MessagesController running");
   $scope.messageDisplay = '';
   $scope.username = userSessionService.getUserSession().username;
-  
+  var convList= [];
+  var respDataLen;
+
   // $http({
   //     url: '/loadMessages/' + $scope.username, 
   //     // url: '/about', 
@@ -277,24 +279,48 @@ mainApp.controller('MessagesController', function($scope, $http, userSessionServ
       // url: '/about', 
       method: "GET"
     })
-    .success(function(response) {
+    .then(function successCallback(response) {
+      respDataLen = response.data.length;
       console.log("success with loadConversations: ", response);
-    });
+      var i;
+      for (i = 0; i< respDataLen; i++)
+      {
+        convList.push({
+            contactUsername:   response.data[i].contactUsername,
+            lastMessage: response.data[i].lastMessage,
+            dateOfMessage: response.data[i].dateOfMessage,
+        });
+      }
+    },  function errorCallback(response) {
+    // called asynchronously if an error occurs
+    // or server returns response with an error status.
+      console.log("error: ", response.error);
+   });
 
-  $http({
-      url: '/loadConversation/test2', 
-      // url: '/about', 
-      method: "GET"
-    })
-    .success(function(response) {
-      console.log("success with loadConversation: ", response);
-    });
+  // $http({
+  //     url: '/loadConversation/test2', 
+  //     // url: '/about', 
+  //     method: "GET"
+  //   })
+  //   .success(function(response) {
+  //     console.log("success with loadConversation: ", response);
+  //   });
 
   socket.on('joined_server', function(data){
     if(data.message) 
     {
       $scope.messageDisplay += (data.username ? data.username : 'Server') + ': ' + data.message + '\n';
       socket.emit('join', {username: $scope.username});
+
+      var i;
+      for (i = 0; i< respDataLen; i++)
+      {
+        $scope.messageDisplay += convList[i].contactUsername;
+        $scope.messageDisplay += ": ";
+        $scope.messageDisplay += convList[i].lastMessage;
+        $scope.messageDisplay += " ";
+        $scope.messageDisplay += convList[i].dateOfMessage;
+      }
     } else {
       console.log("No msg: ", data.message);
     }
@@ -536,8 +562,8 @@ mainApp.controller('LoginController', function($scope, $routeParams, $http, $loc
       }
     });
     $scope.message = 'We\'re glad to have you. To get started, select Browse Profiles from the dropdown menu in the navigation bar.';
-    $scope.user = { username: "abc@gmail.com",
-                    password: "ab"};
+    $scope.user = { username: "mu@gmail.com",
+                    password: "mp"};
     
     $scope.login = function()
     {

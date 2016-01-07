@@ -244,8 +244,13 @@ router.route('/getSurvey')
 
 router.route('/loadConversations')
 .get(isAuthenticated, function(req, res) {
+  //PASS
+  console.log("in loadConversations");
   var result = [];
+  //Find Conversation with each and all distinct users
   for(var i = 0; i < req.user.conversations.length; i++){
+
+    
     Conversation.findOne({'_id': req.user.conversations[i]}, function(err, conversation){
       if(err){
         console.log(err);
@@ -257,14 +262,21 @@ router.route('/loadConversations')
         var resultJSON = {contactUsername: contactUsername,
                                 lastMessage: lastMessage,
                                 dateOfMessage: dateOfMessage};
+
         result.push(resultJSON);
+         console.log("/loadconversations: adding to conversation to result[] ");
+      
       } else {
         console.log("conversation not found!");
       }
       if(result.length == req.user.conversations.length){
+        console.log("/loadconversations: return conversation result[]")
         res.json(result);
       }
-    });
+
+      });
+
+    
   }
 });
 
