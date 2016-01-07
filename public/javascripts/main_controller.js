@@ -84,7 +84,7 @@ mainApp.config(['$routeProvider', function($routeProvider) {
         controller: 'MessagesController'
       }).
       otherwise({
-        redirectTo: '/about'
+        redirectTo: '/login'
       });
   }]);
 
