@@ -183,7 +183,7 @@ function getProfilePicture(user, callback){
 router.route('/')
 .get(function(req, res) {
     //Query from MongoDB
-    res.render('index', {title: 'Turnabout'});
+    res.render('index', {title: 'title'});
 });
 
 router.route('/home')

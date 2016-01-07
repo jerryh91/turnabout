@@ -561,7 +561,7 @@ mainApp.controller('LoginController', function($scope, $routeParams, $http, $loc
         userSessionService.setUserSession(response);
       }
     });
-    $scope.message = 'We\'re glad to have you. To get started, select Browse Profiles from the dropdown menu in the navigation bar.';
+    $scope.message = '';
     $scope.user = { username: "mu@gmail.com",
                     password: "mp"};
     
