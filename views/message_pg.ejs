@@ -1,13 +1,15 @@
 <div class="container-fluid">
     <h1>Messages Page</h1>
     <div id="content" style='width: 500px; height: 300px; margin: 0 0 20px 0; border: solid 1px #999; overflow-y: scroll;'>
+        
         <pre>{{messageDisplay}}</pre>
+        <pre ng-bind-html="myHTML"></pre>
         <br>    
     </div>
     <div class="controls">
         <input type="text" class="form-control" ng-model="receiverUsername" placeholder="receiverUsername" style='width: 500px'/><br>
         <form ng-submit="sendMessage()">
-            <input id="field" ng-model="messageContent" style="width:350px;" placeholder=" message">
+            <input id="field" ng-model="messageContent" style="width:350px;" placeholder="message">
             <input id="send" type="button" ng-click="sendMessage()" value="send">
         </form>
     </div>

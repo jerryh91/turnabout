@@ -1,4 +1,4 @@
-var mainApp = angular.module('WhySoSingle', ['ngRoute', 'btford.socket-io', 'xeditable']);
+var mainApp = angular.module('WhySoSingle', ['ngRoute', 'btford.socket-io', 'xeditable', 'ngSanitize']);
 
 //$locationProvider.html5Mode(true);
 
@@ -261,6 +261,7 @@ mainApp.controller('BrowseController', function($scope, $routeParams, $location,
 mainApp.controller('MessagesController', function($scope, $http, userSessionService, socket, focus){
   console.log("MessagesController running");
   $scope.messageDisplay = '';
+  $scope.myHTML = '';
   $scope.username = userSessionService.getUserSession().username;
   var convList= [];
   var respDataLen;
@@ -313,13 +314,20 @@ mainApp.controller('MessagesController', function($scope, $http, userSessionServ
       socket.emit('join', {username: $scope.username});
 
       var i;
+      var conversationID = 20;
+
+      console.log(respDataLen);
       for (i = 0; i< respDataLen; i++)
       {
-        $scope.messageDisplay += convList[i].contactUsername;
-        $scope.messageDisplay += ": ";
-        $scope.messageDisplay += convList[i].lastMessage;
-        $scope.messageDisplay += " ";
-        $scope.messageDisplay += convList[i].dateOfMessage;
+        $scope.myHTML += '<a href="loadMessages/';
+        $scope.myHTML += conversationID;
+        $scope.myHTML += '">';
+        $scope.myHTML += convList[i].contactUsername;
+        $scope.myHTML += ": ";
+        $scope.myHTML += convList[i].lastMessage;
+        $scope.myHTML += " ";
+        $scope.myHTML += convList[i].dateOfMessage;
+         $scope.myHTML += "</a>";
       }
     } else {
       console.log("No msg: ", data.message);

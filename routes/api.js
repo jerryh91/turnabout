@@ -320,6 +320,15 @@ function grabConversation(conversation){
   return result;
 }
 
+//Load all messages for a given conversations
+// router.router('/messages/:conversationID')
+// .get(isAuthenticated, function(req, res)
+// {
+//    Conversation.find({con})
+
+
+// });
+
 router.route('/loadMessages/:requestingUser')
 .get(isAuthenticated, function(req, res) {
     console.log("entered load messages route with req username: ", req.params.requestingUser);
