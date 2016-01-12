@@ -244,12 +244,10 @@ router.route('/getSurvey')
 
 router.route('/loadConversations')
 .get(isAuthenticated, function(req, res) {
-  //PASS
-  console.log("in loadConversations");
+  
   var result = [];
   //Find Conversation with each and all distinct users
   for(var i = 0; i < req.user.conversations.length; i++){
-
     
     Conversation.findOne({'_id': req.user.conversations[i]}, function(err, conversation){
       if(err){
@@ -259,12 +257,16 @@ router.route('/loadConversations')
         var contactUsername = (conversation.initiatorUsername == req.user.username) ? conversation.responderUsername : conversation.initiatorUsername;
         var lastMessage = conversation.messages[conversation.messages.length-1].content;
         var dateOfMessage = conversation.messages[conversation.messages.length-1].date;
+        var convID = conversation._id;
+        //PASS
+        console.log("/loadConversations: convID: ", convID);
         var resultJSON = {contactUsername: contactUsername,
-                                lastMessage: lastMessage,
-                                dateOfMessage: dateOfMessage};
+                          lastMessage: lastMessage,
+                          dateOfMessage: dateOfMessage,
+                          convID: convID};
 
         result.push(resultJSON);
-         console.log("/loadconversations: adding to conversation to result[] ");
+        console.log("/loadconversations: adding to conversation to result[] ");
       
       } else {
         console.log("conversation not found!");
@@ -312,26 +314,39 @@ function grabConversation(conversation){
     var username = conversation.messages[i].senderUsername;
     var message = conversation.messages[i].content;
     var dateOfMessage = conversation.messages[i].date;
+    var convID = conversation._id;
+    convID = convID.str;
+    console.log("grabConversation (): ", convID);
     var messageJSON = {username: username,
                        message: message,
-                       dateOfMessage: dateOfMessage};
+                       dateOfMessage: dateOfMessage,
+                       convID: convID};
+    
     result.push(messageJSON);
   }
   return result;
 }
 
-//Load all messages for a given conversations
+// //Load all messages for a given conversations
 // router.router('/messages/:conversationID')
 // .get(isAuthenticated, function(req, res)
 // {
-//    Conversation.find({con})
+//    Conversation.findOne({"_id" : ObjectId(req.params.conversationID)}, function(err, conv){
+//       if(err){
+//             console.log(err);
+//             return;
+//         }
+//         if(conv){
+//    });
 
 
 // });
 
-router.route('/loadMessages/:requestingUser')
+//Message List View:
+//Load all messages from oldest to newest for 1 given conversation
+router.route('/loadMessages/:requestingUsername')
 .get(isAuthenticated, function(req, res) {
-    console.log("entered load messages route with req username: ", req.params.requestingUser);
+    console.log("/loadMessages/: req username: ", req.params.requestingUsername);
     User.findOne({'username': req.params.requestingUser}, function(err, user){
         if(err){
             console.log(err);

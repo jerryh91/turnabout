@@ -283,6 +283,7 @@ mainApp.controller('MessagesController', function($scope, $http, userSessionServ
     .then(function successCallback(response) {
       respDataLen = response.data.length;
       console.log("success with loadConversations: ", response);
+
       var i;
       for (i = 0; i< respDataLen; i++)
       {
@@ -290,6 +291,7 @@ mainApp.controller('MessagesController', function($scope, $http, userSessionServ
             contactUsername:   response.data[i].contactUsername,
             lastMessage: response.data[i].lastMessage,
             dateOfMessage: response.data[i].dateOfMessage,
+            convID: response.data[i].convID
         });
       }
     },  function errorCallback(response) {
@@ -314,20 +316,18 @@ mainApp.controller('MessagesController', function($scope, $http, userSessionServ
       socket.emit('join', {username: $scope.username});
 
       var i;
-      var conversationID = 20;
-
-      console.log(respDataLen);
+      //console.log("Number of Conversation: " + respDataLen);
       for (i = 0; i< respDataLen; i++)
       {
         $scope.myHTML += '<a href="loadMessages/';
-        $scope.myHTML += conversationID;
+        $scope.myHTML += $scope.username;
         $scope.myHTML += '">';
         $scope.myHTML += convList[i].contactUsername;
         $scope.myHTML += ": ";
         $scope.myHTML += convList[i].lastMessage;
-        $scope.myHTML += " ";
+        $scope.myHTML += " (";
         $scope.myHTML += convList[i].dateOfMessage;
-         $scope.myHTML += "</a>";
+        $scope.myHTML += ")</a>";
       }
     } else {
       console.log("No msg: ", data.message);
