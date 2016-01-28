@@ -316,7 +316,6 @@ function grabConversation(conversation){
     var dateOfMessage = conversation.messages[i].date;
     var convID = conversation._id;
     convID = convID.str;
-    console.log("grabConversation (): ", convID);
     var messageJSON = {username: username,
                        message: message,
                        dateOfMessage: dateOfMessage,
@@ -342,41 +341,47 @@ function grabConversation(conversation){
 
 // });
 
+//TODO:
 //Message List View:
 //Load all messages from oldest to newest for 1 given conversation
-router.route('/loadMessages/:requestingUsername')
+router.route('/messages/:conversationID')
 .get(isAuthenticated, function(req, res) {
-    console.log("/loadMessages/: req username: ", req.params.requestingUsername);
-    User.findOne({'username': req.params.requestingUser}, function(err, user){
+    console.log("/messages/: conversationID: ", req.params.conversationID);
+
+    //Alternate Method 1:
+    //Use Other Username (the user conversing with this user)
+    //to query all messages in this conversation
+
+    //Need to know who's initiator and who's responder 
+
+    Conversation.findOne({'_id': req.params.conversationID}, function(err, conv)
+    {
         if(err){
             console.log(err);
             return;
         }
-        if(user){
-            console.log("User found: " + req.params.requestingUser);
-            if(user.conversations){
-                var foundConversations = [];
-                for(var i = 0; i < user.conversations.length; i++){
-                    console.log("user.conversations[" + i + "]: " + user.conversations[i]);
-                    Conversation.findOne({'conversationID': user.conversations[i].conversationID}, function(err, conversation){
-                        if(err){
-                            console.log("err finding ConversationID: ");
-                        }
-                        if(conversation){
-                            console.log("conversation found")
-                            console.log(conversation);
-                            foundConversations.push(conversation);
-                        } else {
-                            console.log("conversation not found");
-                        }
-                        if(foundConversations.length == user.conversations.length){
-                            res.json(foundConversations);
-                        }
-                    });
+        if(conv)
+        {
+            if(conv.messages)
+            {
+                var foundMessages = [];
+                for(var i = 0; i < conv.messages.length; i++)
+                {   
+                    foundMessages.push(conv.messages[i]);
+                        
+                    if(foundMessages.length == conv.messages.length)
+                    {
+                      //QUESTION:
+                      //If not part of $HTTP request from AngularJS controller,
+                      //How to retrieve response data in main-controller.js?
+                      res.json(foundMessages);
+                    }
                 }
-            }
-        } else{
-            console.log("User does not exist");
+              }
+        }
+        else
+        {
+            console.log("Conversation: ", req.params.conversationID, " not found");
             return;
         }
     });
