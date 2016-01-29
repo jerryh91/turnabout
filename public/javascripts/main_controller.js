@@ -262,11 +262,6 @@ mainApp.controller('BrowseController', function($scope, $routeParams, $location,
   $scope.profiles = results;
 });
 
-mainApp.controller('LoadMessagesController', function($scope, $http, userSessionService, socket, focus){
-  console.log("LoadMessagesController running");
-  
-});
-
 mainApp.controller('MessagesController', function($scope, $http, userSessionService, socket, focus){
   console.log("MessagesController running");
   $scope.messageDisplay = '';
@@ -275,15 +270,6 @@ mainApp.controller('MessagesController', function($scope, $http, userSessionServ
 
   var convList= [];
   var respDataLen;
-
-  // $http({
-  //     url: '/loadMessages/' + $scope.username, 
-  //     // url: '/about', 
-  //     method: "GET"
-  //   })
-  //   .success(function(response) {
-  //     console.log("success loadMessages " + response);
-  //   });
 
   $http({
       url: '/loadConversations', 
@@ -311,14 +297,6 @@ mainApp.controller('MessagesController', function($scope, $http, userSessionServ
       console.log("error: ", response.error);
    });
 
-  // $http({
-  //     url: '/loadConversation/test2', 
-  //     // url: '/about', 
-  //     method: "GET"
-  //   })
-  //   .success(function(response) {
-  //     console.log("success with loadConversation: ", response);
-  //   });
 
   socket.on('joined_server', function(data){
     if(data.message) 
@@ -328,19 +306,6 @@ mainApp.controller('MessagesController', function($scope, $http, userSessionServ
 
       var i;
       $scope.convList = convList;
-      //console.log("Number of Conversation: " + respDataLen);
-      // for (i = 0; i< respDataLen; i++)
-      // {
-      //   $scope.myHTML += '<a href="messages/';
-      //   $scope.myHTML += convList[i].convID;
-      //   $scope.myHTML += '">';
-      //   $scope.myHTML += convList[i].contactUsername;
-      //   $scope.myHTML += ": ";
-      //   $scope.myHTML += convList[i].lastMessage;
-      //   $scope.myHTML += " (";
-      //   $scope.myHTML += convList[i].dateOfMessage;
-      //   $scope.myHTML += ")</a>";
-      // }
     } else {
       console.log("No msg: ", data.message);
     }
@@ -354,13 +319,13 @@ mainApp.controller('MessagesController', function($scope, $http, userSessionServ
       console.log("No msg: ", data.message);
     }
   });
-  $scope.showMessages = function ()
+  $scope.showMessages = function (conv)
   {
-    console.log("showMessages()");
-
-
+    var msgList = [];
+    console.log("showMessages()", conv.convID);
+    var intConvId = conv.convID.toString();
     $http({
-        url: '/messages/' + $scope.convID, 
+        url: '/messages/' + intConvId, 
         // url: '/about', 
         method: "GET"
       })
@@ -369,8 +334,16 @@ mainApp.controller('MessagesController', function($scope, $http, userSessionServ
         console.log("messages length: ", respDataLen);
          for (i = 0; i< respDataLen; i++)
         {
-            console.log("msg" +i + response.data[i]);
+            msgList.push({
+            senderUsername: response.data[i].senderUsername, 
+            receiverUsername: response.data[i].receiverUsername, 
+            content: response.data[i].content,
+            date: response.data[i].data 
+          });
+
         }
+        $scope.msgList = msgList;
+        $scope.convList = [];
       },  function errorCallback(response) {
       // called asynchronously if an error occurs
       // or server returns response with an error status.

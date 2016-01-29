@@ -3,7 +3,8 @@
     <div id="content" style='width: 500px; height: 300px; margin: 0 0 20px 0; border: solid 1px #999; overflow-y: scroll;'>
         
         <pre>{{messageDisplay}}</pre>
-        <pre ng-click="showMessages()"ng-repeat="conv in convList">{{conv.contactUsername}}: {{conv.lastMessage}} {{conv.dateOfMessage}}</pre>
+        <pre ng-click="showMessages(conv)"ng-repeat="conv in convList">{{conv.contactUsername}}: {{conv.lastMessage}} {{conv.dateOfMessage}}</pre>
+        <pre ng-repeat="msg in msgList">{{msg.content}} {{msg.date}}</pre>
         <br>    
     </div>
     <div class="controls">
