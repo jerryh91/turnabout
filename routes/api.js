@@ -264,7 +264,7 @@ router.route('/getSurvey')
 
 router.route('/loadConversations')
 .get(isAuthenticated, function(req, res) {
-  
+  console.log("/loadConversations");
   var result = [];
   //Find Conversation with each and all distinct users
   for(var i = 0; i < req.user.conversations.length; i++){
@@ -296,70 +296,9 @@ router.route('/loadConversations')
         res.json(result);
       }
 
-      });
-
-    
+      });    
   }
 });
-
-router.route('/loadConversation/:username')
-.get(isAuthenticated, function(req, res){
-  //look for conversation
-  Conversation.findOne({'initiatorUsername': req.user.username, 'responderUsername': req.params.username}, function(err, conversation){
-    if(err){
-      console.log(err);
-    }
-    if(conversation){
-      res.json(grabConversation(conversation));
-    } else {
-      //look again, but swap the initiator and responder username
-      // TODO: make this better. Maybe an array of usernames is better?
-      Conversation.findOne({'initiatorUsername': req.params.username, 'responderUsername': req.user.username}, function(err, conversation2){
-        if(err){
-          console.log(err);
-        }
-        if(conversation2){
-          res.json(grabConversation(conversation2));
-        } else {
-          console.log("conversation not found!");
-        }
-      });
-    };  
-  });
-});
-
-function grabConversation(conversation){
-  var result = [];
-  for(var i = 0; i < conversation.messages.length; i++){
-    var username = conversation.messages[i].senderUsername;
-    var message = conversation.messages[i].content;
-    var dateOfMessage = conversation.messages[i].date;
-    var convID = conversation._id;
-    convID = convID.str;
-    var messageJSON = {username: username,
-                       message: message,
-                       dateOfMessage: dateOfMessage,
-                       convID: convID};
-    
-    result.push(messageJSON);
-  }
-  return result;
-}
-
-// //Load all messages for a given conversations
-// router.router('/messages/:conversationID')
-// .get(isAuthenticated, function(req, res)
-// {
-//    Conversation.findOne({"_id" : ObjectId(req.params.conversationID)}, function(err, conv){
-//       if(err){
-//             console.log(err);
-//             return;
-//         }
-//         if(conv){
-//    });
-
-
-// });
 
 //TODO:
 //Message List View:
