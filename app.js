@@ -22,7 +22,7 @@ initPassport(passport);
 
 //Connect to MongoDB
 //mongoose.connect('mongodb://localhost:27017/whysosingle');
-mongoose.connect('mongodb://heroku_2jjn5lqq:Qwerty1@ds061415.mongolab.com:61415/heroku_2jjn5lqq');
+mongoose.connect('mongodb://user1:user1@ds061415.mongolab.com:61415/heroku_2jjn5lqq');
 var User = mongoose.model('User');
 var Conversation = mongoose.model('Conversation');
 // var Message = mongoose.model('Message');
