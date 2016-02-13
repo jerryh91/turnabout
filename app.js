@@ -28,7 +28,7 @@ var Conversation = mongoose.model('Conversation');
 // var Message = mongoose.model('Message');
 
 var app = express();
-var port = 1337;
+var port = process.env.PORT || 1337;
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
