@@ -90,7 +90,7 @@ var io = require('socket.io').listen(app.listen(port, function()
 io.sockets.on('connection', function (socket) 
 {
 
-  console.log('socket: connection event');
+  console.log('socket:s connection event');
    
   //Load existing Conversations for logged in user
   //to message var
