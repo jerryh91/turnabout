@@ -40,6 +40,26 @@ conn.once('open', function() {
   gfs = Grid(conn.db);
 });
 
+// router.route('/like/:likedusername')
+// .post(function(req, res) {
+//   var likeduser = req.params.likedusername;
+//   console.log("api: likedusername: ", likeduser);
+//   User.findOne({'username': likeduser}, function(err, user)
+//     {
+//       if (err)
+//       {
+//         console.log(err);
+//         //return done(err, false);
+//       }
+      
+//       if (user)
+//       {
+//         User.update(
+//       }
+//     }
+
+// });
+
 router.post('/upload/photo', isAuthenticated, upload.single('profilePic'), function(req, res, next){
   //multer handles multipart/form-data so we just need to grab req.file
   var writestream = gfs.createWriteStream({
@@ -187,7 +207,7 @@ router.route('/')
 });
 
 router.route('/home')
-.get(function(req, res) {
+.get(function(req, res) {             
     //Query from MongoDB
     res.render('home', {message: 'My message'});
 });

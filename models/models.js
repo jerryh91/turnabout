@@ -21,6 +21,7 @@ var userSchema = new mongoose.Schema({
     conversations: [{type: String, ref: 'Conversation'}],
     about: String,
     lastOnline: String,
+    like: [{type: String}],
     additionalInfo: {
         smoker: String,
         drinks: String,

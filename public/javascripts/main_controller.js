@@ -1,4 +1,4 @@
-var mainApp = angular.module('WhySoSingle', ['ngRoute', 'btford.socket-io', 'xeditable', 'ngSanitize']);
+  var mainApp = angular.module('WhySoSingle', ['ngRoute', 'btford.socket-io', 'xeditable', 'ngSanitize']);
 
 //$locationProvider.html5Mode(true);
 
@@ -253,19 +253,40 @@ mainApp.controller('MainController', function($scope, $window, $route, $routePar
   };
 });
 
-mainApp.controller('BrowseController', function($scope, $routeParams, $location, searchService) {
+mainApp.controller('BrowseController', function($scope, $routeParams, $location, $http, searchService, userSessionService) {
   var results = searchService.getResults();
   var search = searchService.getSearch();
   $scope.fileLocation = $location;
   $scope.groupName = "Men";
   $scope.searchCriteria = "Location: " + search.location + "|Radius: " + search.radius;
   $scope.profiles = results;
+
+  $scope.sendLike = function (profile) {
+    //Find User who's being liked
+    var likedusername = profile.username;
+    var thisusername = userSessionService.getUserSession().username;
+    
+    //Add current user to being liked User's like array
+     $http({
+        url: '/like/' + likedusername, 
+        method: "POST"
+      })
+      .then(function successCallback(response) {
+        //update likes in view 
+
+      },  function errorCallback(response) {
+      // called asynchronously if an error occurs
+      // or server returns response with an error status.
+        console.log("error: ", response.error);
+     });
+    
+  };
+
 });
 
 mainApp.controller('MessagesController', function($scope, $http, userSessionService, socket, focus){
   console.log("MessagesController running");
   $scope.messageDisplay = '';
-  $scope.myHTML = '';
   $scope.username = userSessionService.getUserSession().username;
 
   var convList= [];
@@ -273,7 +294,6 @@ mainApp.controller('MessagesController', function($scope, $http, userSessionServ
 
   $http({
       url: '/loadConversations', 
-      // url: '/about', 
       method: "GET"
     })
     .then(function successCallback(response) {
@@ -319,6 +339,8 @@ mainApp.controller('MessagesController', function($scope, $http, userSessionServ
       console.log("No msg: ", data.message);
     }
   });
+
+
   $scope.showMessages = function (conv)
   {
     var msgList = [];
