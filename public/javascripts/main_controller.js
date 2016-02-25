@@ -262,17 +262,16 @@ mainApp.controller('BrowseController', function($scope, $routeParams, $location,
   $scope.profiles = results;
 
   $scope.sendLike = function (profile) {
-    //Find User who's being liked
+
     var likedusername = profile.username;
     var thisusername = userSessionService.getUserSession().username;
-    
-    //Add current user to being liked User's like array
+
      $http({
-        url: '/like/' + likedusername, 
+        url: '/like/' + likedusername + '/' + thisusername, 
         method: "POST"
       })
       .then(function successCallback(response) {
-        //update likes in view 
+        //TODO: update likes in view 
 
       },  function errorCallback(response) {
       // called asynchronously if an error occurs

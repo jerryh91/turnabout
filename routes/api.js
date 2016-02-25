@@ -40,25 +40,71 @@ conn.once('open', function() {
   gfs = Grid(conn.db);
 });
 
-// router.route('/like/:likedusername')
-// .post(function(req, res) {
-//   var likeduser = req.params.likedusername;
-//   console.log("api: likedusername: ", likeduser);
-//   User.findOne({'username': likeduser}, function(err, user)
-//     {
-//       if (err)
-//       {
-//         console.log(err);
-//         //return done(err, false);
-//       }
-      
-//       if (user)
-//       {
-//         User.update(
-//       }
-//     }
+router.route('/like/:likedusername/:thisusername')
+.post(function(req, res) {
 
-// });
+  var likeduser = req.params.likedusername;
+  var thisuser = req.params.thisusername;
+  var thisuser_gender;
+  console.log("api.js: likedusername: ", likeduser, "thisusername: ", thisuser);
+
+  //FEATURE: Only let Female user initiate like
+  User.findOne({'username': likeduser}, function findThisuserGender (err, user)
+  {
+
+    if (err)
+      {
+        console.log(err);
+        return done(err);
+      }
+      
+      if (user)
+      {
+        thisuser_gender = user.gender;
+
+        if (gender == "male")
+        {
+            //TODO:
+            //Send prompt noting males can't initiate likes
+            return done(err, false);
+
+        }
+
+        User.findOne({'username': likeduser}, function updateLikedUserLike(err, user)
+        {
+            if (err)
+            {
+              console.log(err);
+              return done(err);
+            }
+            
+            if (user)
+            {
+              var userlikes = user.like;
+              //Add to userlikes iff: 
+              //user being liked has NOT been liked by this user before
+              if (userlikes.indexOf(thisuser) == -1)
+              {
+                  userlikes.push(thisuser);
+              }
+
+              //Update liked user document in User collection with new user likes
+              user.likes = userlikes;
+              user.save(function(err) 
+              {
+                  if (err)
+                    console.log('error updating likes in user: ', likeduser);
+                  else
+                    console.log('success updating likes in user: ', likeduser);
+              });
+
+            }
+        });
+
+      }
+    })
+  
+});
 
 router.post('/upload/photo', isAuthenticated, upload.single('profilePic'), function(req, res, next){
   //multer handles multipart/form-data so we just need to grab req.file
@@ -76,7 +122,7 @@ router.post('/upload/photo', isAuthenticated, upload.single('profilePic'), funct
       if (err)
       {
         console.log(err);
-        //return done(err, false);
+        return done(err, false);
       }
       
       if (user)
@@ -121,7 +167,7 @@ router.post('/profile/update', isAuthenticated, function(req, res, next){
     if (err)
     {
       console.log(err);
-      //return done(err, false);
+      return done(err, false);
     }
     
     if (user)
@@ -143,7 +189,7 @@ router.get('/profile/:id', isAuthenticated, function(req, res) {
     if (err)
     {
       console.log(err);
-      //return done(err, false);
+      return done(err, false);
     }
     
     if (user)
@@ -233,7 +279,8 @@ router.route('/login')
 
 router.route('/browse')
 .get(isAuthenticated, function(req, res) {
-    //Query from MongoDB
+    //Query for existing Users from db
+
     res.render('browse', {title: 'express'});
 });
 
@@ -244,9 +291,41 @@ router.route('/blog')
 
 router.route('/search')
 .get(isAuthenticated, function(req, res) {
+     console.log("/search");
     if (req.query.location) {
-        // PUT SEARCH LOGIC HERE
-        res.json(filteredProfiles);
+        console.log("/search: have location!");
+        //TODO: Search logic w/ passed query criterias
+        
+        //Retrieve criteria value
+        // var location = req.query.location;
+        // var radius = req.query.radius;
+        // var agemin = req.query.agemin;
+        // var agemax = req.query.agemax;
+        // var gender = req.query.gender;
+      
+        //For now: Retrieve all profiles in DB 
+        
+        Users.find({}, function (err, users)
+          {
+            console.log("/search: finding users!");
+              if(err)
+              {
+                console.log(err);
+                return done(err);
+              }
+              if (users)
+              {
+                console.log("/search: found users!");
+                res.json(users);
+
+              } else
+              {
+                console.log("no users in db");
+                return ;
+              }
+
+          });
+        //res.json(filteredProfiles);
     } else {
         res.render('search', {title: 'express'});
     }
@@ -272,6 +351,7 @@ router.route('/loadConversations')
     Conversation.findOne({'_id': req.user.conversations[i]}, function(err, conversation){
       if(err){
         console.log(err);
+        return done(err,false);
       }
       if(conversation){
         var contactUsername = (conversation.initiatorUsername == req.user.username) ? conversation.responderUsername : conversation.initiatorUsername;
@@ -290,6 +370,7 @@ router.route('/loadConversations')
       
       } else {
         console.log("conversation not found!");
+        return done(err);
       }
       if(result.length == req.user.conversations.length){
         console.log("/loadconversations: return conversation result[]")
@@ -317,7 +398,7 @@ router.route('/messages/:conversationID')
     {
         if(err){
             console.log(err);
-            return;
+            return done(err, false);
         }
         if(conv)
         {
@@ -354,7 +435,7 @@ router.route('/getprofileinfo/:id')
         User.findOne({'username': profileID}, function(err, user){
             if(err){
                 console.log(err);
-                return;
+                return done(err, false);
             }
             if(user){
                 // console.log("User found: " + profileID);
