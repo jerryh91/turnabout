@@ -260,6 +260,7 @@ mainApp.controller('BrowseController', function($scope, $routeParams, $location,
   $scope.groupName = "Men";
   $scope.searchCriteria = "Location: " + search.location + "|Radius: " + search.radius;
   $scope.profiles = results;
+  console.log("BrowseController");
 
   $scope.sendLike = function (profile) {
 
@@ -272,6 +273,7 @@ mainApp.controller('BrowseController', function($scope, $routeParams, $location,
       })
       .then(function successCallback(response) {
         //TODO: update likes in view 
+        console.log("success updating likes");
 
       },  function errorCallback(response) {
       // called asynchronously if an error occurs

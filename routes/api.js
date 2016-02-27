@@ -49,25 +49,26 @@ router.route('/like/:likedusername/:thisusername')
   console.log("api.js: likedusername: ", likeduser, "thisusername: ", thisuser);
 
   //FEATURE: Only let Female user initiate like
-  User.findOne({'username': likeduser}, function findThisuserGender (err, user)
+  User.findOne({'username': thisuser}, function findThisuserGender (err, user)
   {
 
     if (err)
       {
         console.log(err);
-        return done(err);
+        res.status(500).send({ error: 'error accessing database' });
       }
       
       if (user)
       {
+
         thisuser_gender = user.gender;
 
-        if (gender == "male")
+        if (thisuser_gender == "male")
         {
             //TODO:
             //Send prompt noting males can't initiate likes
-            return done(err, false);
-
+            console.log("Males can't like Females");
+            res.status(403).send({ error: "male forbidden to initiate likes" });
         }
 
         User.findOne({'username': likeduser}, function updateLikedUserLike(err, user)
@@ -75,7 +76,7 @@ router.route('/like/:likedusername/:thisusername')
             if (err)
             {
               console.log(err);
-              return done(err);
+              res.status(500).send({ error: 'error accessing database' });
             }
             
             if (user)
@@ -303,9 +304,8 @@ router.route('/search')
         // var agemax = req.query.agemax;
         // var gender = req.query.gender;
       
-        //For now: Retrieve all profiles in DB 
-        
-        Users.find({}, function (err, users)
+        //FOR NOW: Retrieve all users in DB 
+        User.find({}, function (err, users)
           {
             console.log("/search: finding users!");
               if(err)
