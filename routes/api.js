@@ -55,7 +55,7 @@ router.route('/like/:likedusername/:thisusername')
     if (err)
       {
         console.log(err);
-        res.status(500).send({ error: 'error accessing database' });
+        return res.status(500).send({ error: 'error accessing database' });
       }
       
       if (user)
@@ -68,7 +68,8 @@ router.route('/like/:likedusername/:thisusername')
             //TODO:
             //Send prompt noting males can't initiate likes
             console.log("Males can't like Females");
-            res.status(500).send({ error: "male forbidden to initiate likes" });
+            return res.status(403).send({ error: "male forbidden to initiate likes" });
+
         }
 
         User.findOne({'username': likeduser}, function updateLikedUserLike(err, user)
@@ -76,7 +77,7 @@ router.route('/like/:likedusername/:thisusername')
             if (err)
             {
               console.log(err);
-              res.status(500).send({ error: 'error accessing database' });
+              return res.status(500).send({ error: 'error accessing database' });
             }
             
             if (user)
@@ -94,9 +95,13 @@ router.route('/like/:likedusername/:thisusername')
               user.save(function(err) 
               {
                   if (err)
-                    res.status(500).send({ error: 'error updating likes of user:' + likeduser + 'in database');
+                  {
+                    return res.status(500).send({ error: 'error updating likes of user:' + likeduser + 'in database'});
+                  }
                   else
+                  {
                     console.log('success updating likes in user: ', likeduser);
+                    }
               });
 
             }
@@ -123,7 +128,7 @@ router.post('/upload/photo', isAuthenticated, upload.single('profilePic'), funct
       if (err)
       {
         console.log(err);
-        res.status(500).send({ error: 'error accessing database' });
+        return res.status(500).send({ error: 'error accessing database' });
       }
       
       if (user)
@@ -139,7 +144,7 @@ router.post('/upload/photo', isAuthenticated, upload.single('profilePic'), funct
             if (err)
             {
               console.log(err);
-              res.status(500).send({ error: 'error accessing database' });
+              return res.status(500).send({ error: 'error accessing database' });
             }
             console.log('Successfully added photoID to user. Results are: ' + results);
             //return done(null, user);
@@ -154,7 +159,10 @@ router.post('/upload/photo', isAuthenticated, upload.single('profilePic'), funct
 
     res.send("Success!");
     fs.unlink(req.file.path, function (err) {
-      if (err) console.error("Error: " + err);
+      if (err)
+      {
+        return res.status(500).send({ error: 'error deleting' });
+      }
       console.log('successfully deleted : '+ req.file.path );
     });
   });
@@ -168,7 +176,7 @@ router.post('/profile/update', isAuthenticated, function(req, res, next){
     if (err)
     {
       console.log(err);
-      res.status(500).send({ error: 'error accessing database' });
+      return res.status(500).send({ error: 'error accessing database' });
     }
     
     if (user)
@@ -190,7 +198,7 @@ router.get('/profile/:id', isAuthenticated, function(req, res) {
     if (err)
     {
       console.log(err);
-      res.status(500).send({ error: 'error accessing database' });
+      return res.status(500).send({ error: 'error accessing database' });
     }
     
     if (user)

@@ -280,7 +280,12 @@ mainApp.controller('BrowseController', function($scope, $routeParams, $location,
       // or server returns response with an error status.
 
          //TODO: Parse error, give warning prompts if required (eg: males can't like females)
-        console.log("error: ", response.error);
+        if (response.data == "male forbidden to initiate likes")
+        {
+          //send response data to view
+          console.log("error data: ", response.data);
+        }
+        
      });
     
   };
