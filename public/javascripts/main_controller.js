@@ -275,9 +275,11 @@ mainApp.controller('BrowseController', function($scope, $routeParams, $location,
         //TODO: update likes in view 
         console.log("success updating likes");
 
-      },  function errorCallback(response) {
+      }, function errorCallback(response) {
       // called asynchronously if an error occurs
       // or server returns response with an error status.
+
+         //TODO: Parse error, give warning prompts if required (eg: males can't like females)
         console.log("error: ", response.error);
      });
     
