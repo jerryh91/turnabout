@@ -32,7 +32,8 @@ var userSchema = new mongoose.Schema({
         personalityType: String,
         school: String}, 
     photos: [{photoID: String}],
-    survey: [{question: String, answers: [String], userResponse: String}]
+    survey: [{question: String, answers: [String], userResponse: String}],
+    image_src: String
 });
 
 var conversationSchema = new mongoose.Schema({

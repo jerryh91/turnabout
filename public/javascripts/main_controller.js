@@ -256,24 +256,38 @@ mainApp.controller('MainController', function($scope, $window, $route, $routePar
 mainApp.controller('BrowseController', function($scope, $routeParams, $location, $http, searchService, userSessionService) {
   var results = searchService.getResults();
   var search = searchService.getSearch();
+
   $scope.fileLocation = $location;
   $scope.groupName = "Men";
   $scope.searchCriteria = "Location: " + search.location + "|Radius: " + search.radius;
   $scope.profiles = results;
+  $scope.userlikes;
   console.log("BrowseController");
 
   $scope.sendLike = function (profile) {
 
     var likedusername = profile.username;
     var thisusername = userSessionService.getUserSession().username;
-
+    var userlikes;
      $http({
         url: '/like/' + likedusername + '/' + thisusername, 
         method: "POST"
       })
       .then(function successCallback(response) {
-        //TODO: update likes in view 
-        console.log("success updating likes");
+        //TODO: Update number of likes in views ONLY for the user being liked
+        userlikes = response.data;
+
+        //Iterate scope profiles array, find profile that has been liked
+        //ENHANCEMENT: Use Binary Search
+        for (var i = 0; i < $scope.profiles.length; i++) 
+        {
+          if ($scope.profiles[i].username == likedusername)
+          {
+              console.log("success updating likes for: ", likedusername);
+              $scope.profiles[i].like = "changed!";
+          }
+        };
+        //Update this profile's likes array.
 
       }, function errorCallback(response) {
       // called asynchronously if an error occurs

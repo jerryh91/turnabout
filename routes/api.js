@@ -48,7 +48,7 @@ router.route('/like/:likedusername/:thisusername')
   var thisuser_gender;
   console.log("api.js: likedusername: ", likeduser, "thisusername: ", thisuser);
 
-  //FEATURE: Only let Female user initiate like
+  //FEATURE: Only Female users can like.
   User.findOne({'username': thisuser}, function findThisuserGender (err, user)
   {
 
@@ -88,10 +88,12 @@ router.route('/like/:likedusername/:thisusername')
               if (userlikes.indexOf(thisuser) == -1)
               {
                   userlikes.push(thisuser);
+
               }
 
-              //Update liked user document in User collection with new user likes
+              //Update liked user document in User collection with new number of user likes
               user.likes = userlikes;
+
               user.save(function(err) 
               {
                   if (err)
@@ -101,7 +103,8 @@ router.route('/like/:likedusername/:thisusername')
                   else
                   {
                     console.log('success updating likes in user: ', likeduser);
-                    }
+                    res.json(userlikes);
+                  }
               });
 
             }
