@@ -48,7 +48,9 @@ router.route('/like/:likedusername/:thisusername')
   var thisuser_gender;
   console.log("api.js: likedusername: ", likeduser, "thisusername: ", thisuser);
 
-  //FEATURE: Only Female users can like.
+  //FEATURE:
+  //Only Female users can like Male users.
+  //NO other like pairings: Female -> Female, Male -> Male|Female
   User.findOne({'username': thisuser}, function findThisuserGender (err, user)
   {
 
@@ -70,7 +72,8 @@ router.route('/like/:likedusername/:thisusername')
             console.log("Males can't like Females");
             return res.status(403).send({ error: "male forbidden to initiate likes" });
 
-        }
+        } 
+
 
         User.findOne({'username': likeduser}, function updateLikedUserLike(err, user)
         {
@@ -81,7 +84,7 @@ router.route('/like/:likedusername/:thisusername')
             }
             
             if (user)
-            {
+            { 
               var userlikes = user.like;
               //Add to userlikes iff: 
               //user being liked has NOT been liked by this user before

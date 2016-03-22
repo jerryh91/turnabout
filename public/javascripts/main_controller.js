@@ -261,7 +261,7 @@ mainApp.controller('BrowseController', function($scope, $routeParams, $location,
   $scope.groupName = "Men";
   $scope.searchCriteria = "Location: " + search.location + "|Radius: " + search.radius;
   $scope.profiles = results;
-  $scope.userlikes;
+
   console.log("BrowseController");
 
   $scope.sendLike = function (profile) {
@@ -277,14 +277,18 @@ mainApp.controller('BrowseController', function($scope, $routeParams, $location,
         //TODO: Update number of likes in views ONLY for the user being liked
         userlikes = response.data;
 
-        //Iterate scope profiles array, find profile that has been liked
+        //Iterate scope profiles array:
+        //Update user likes for user that has been liked, 
+        //Only if this user has not been liked by same user before.
         //ENHANCEMENT: Use Binary Search
         for (var i = 0; i < $scope.profiles.length; i++) 
         {
           if ($scope.profiles[i].username == likedusername)
           {
-              console.log("success updating likes for: ", likedusername);
-              $scope.profiles[i].like = "changed!";
+            if($scope.profiles[i].like.indexOf(thisusername)==-1)
+            { 
+              $scope.profiles[i].like.push(thisusername);
+            }  
           }
         };
         //Update this profile's likes array.
@@ -296,7 +300,7 @@ mainApp.controller('BrowseController', function($scope, $routeParams, $location,
         if (response.data.error == "male forbidden to initiate likes")
         {
           //TODO: Give warning prompts in view
-          alert.log("male forbidden to initiate likes!");
+          alert("male forbidden to initiate likes!");
         }
         
      });

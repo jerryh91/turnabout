@@ -10,7 +10,12 @@
         <h2>{{ profile.username}}</h2>
         <h4>{{ profile.points}}Ƥ</h4>
 
-        <h4>{{ profile.points}}likes</h4>
+        <h4>{{profile.like.length}} likes</h4>
+
+        <div ng-if="showTo(message)">
+          <h4>{{profile.like.length}}you've liked {{ profile.username}}</h4>
+        </div> 
+        
         <p>{{profile.detail}}</p>
 
         <p><a href="#/browse" class="btn btn-primary" role="button" ng-click= "sendLike(profile)">Like</a></p>
