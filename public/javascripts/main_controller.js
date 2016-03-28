@@ -18,11 +18,14 @@ mainApp.directive('fileModel', ['$parse', function ($parse) {
     };
 }]);
 
-mainApp.service('fileUpload', ['$http', function ($http) {
-    this.uploadFileToUrl = function(file, uploadUrl, callback){
+mainApp.service('fileUpload', ['$http', function ($http) 
+{
+    this.uploadFileToUrl = function(file, uploadUrl, callback)
+    {
         var fd = new FormData();
         fd.append('profilePic', file);
-        $http.post(uploadUrl, fd, {
+        $http.post(uploadUrl, fd, 
+        {
             transformRequest: angular.identity,
             // headers: {'Content-Type': "multipart/form-data; boundary=----WebKitFormBoundaryffRA1BAOM5nKTmR1",
             //           'Content-Disposition': "form-data; name=profilePic"}
@@ -261,8 +264,13 @@ mainApp.controller('BrowseController', function($scope, $routeParams, $location,
   $scope.groupName = "Men";
   $scope.searchCriteria = "Location: " + search.location + "|Radius: " + search.radius;
   $scope.profiles = results;
+  $scope.thislikelist = [];
 
   console.log("BrowseController");
+
+  //Retrieve for each other user:
+  //list of its user likes, and calculate whether has been liked by this user
+
 
   $scope.sendLike = function (profile) {
 

@@ -77,11 +77,15 @@ router.route('/like/:likedusername/:thisusername')
 
         User.findOne({'username': likeduser}, function updateLikedUserLike(err, user)
         {
+
+
             if (err)
             {
               console.log(err);
               return res.status(500).send({ error: 'error accessing database' });
             }
+
+
             
             if (user)
             { 
@@ -95,7 +99,7 @@ router.route('/like/:likedusername/:thisusername')
               }
 
               //Update liked user document in User collection with new number of user likes
-              user.likes = userlikes;
+              user.like = userlikes;
 
               user.save(function(err) 
               {
@@ -110,9 +114,12 @@ router.route('/like/:likedusername/:thisusername')
                   }
               });
 
+
+
             }
         });
-
+        
+        
       }
     })
   
